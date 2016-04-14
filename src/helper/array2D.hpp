@@ -1,303 +1,307 @@
 /* 
- * Author: Nikhil Biyani - nikhil(dot)biyani(at)gmail(dot)com
- *
- * This file is a part of 2dx.
+ * This file is a part of emkit.
  * 
- * 2dx is free software: you can redistribute it and/or modify
+ * emkit is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or any 
  * later version.
  * 
- * 2dx is distributed in the hope that it will be useful, but WITHOUT 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
- * License for more details <http://www.gnu.org/licenses/>.
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef COLUMN_MAJOR_ARRAY2D_HPP
-#define	COLUMN_MAJOR_ARRAY2D_HPP
+#ifndef ARRAY2D_HPP
+#define	ARRAY2D_HPP
 
 #include <iostream>
 #include <stdexcept>
+#include <cassert>
+#include <vector>
 
 namespace em
 {
     /**
-     * A class to store data 2D data in column major format.
-     * (like Fortran/MATLAB). The data can be traversed in either
-     * coordinates (x, y) or using the ids in which the data
-     * is stored in the memory.
+     * @brief:          A class to store data 2D data in array format.
+     * @description:    The data can either be stored in a column major or
+     *                  a row major format. Internally uses the std::vector
+     *                  class to store the data.
+     * @author:         Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
      */
-    template <class T>
-    class ColumnMajorArray2D
+    template <typename T>
+    class Array2D
     {
-        public:
+        
+    public:
 
         /**
-         * Default constructor. Data pointer will point to NULL and the 
-         * sizes will be initialized by 0 
+         * @brief:          ENUM to define format in which the array is stored.
+         * @description:    Defines how the data is stored in the memory. For
+         *                  COLUMN_MAJOR the columns are fastest changing and 
+         *                  rows are slowest changing while in the
+         *                  ROW_MAJOR order the rows are fastest 
+         *                  changing and the columns are slowest changing.
+         * @author          Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
          */
-        ColumnMajorArray2D()
-            : _data(NULL), _nx(0), _ny(0)
+        enum class ArrayFormat
+        {
+            COLUMN_MAJOR, ROW_MAJOR
+        };
+        
+        /**************************************
+         *  TO PROVIDE C++11 Iterator Algorithms
+         **************************************/
+        
+        typedef std::vector::iterator iterator;
+        typedef std::vector::const_iterator const_iterator;
+        
+        iterator begin()
+        {
+            _data.begin();
+        }
+        
+        const_iterator begin() const
+        {
+            _data.cbegin();
+        }
+        
+        iterator end()
+        {
+            _data.end();
+        }
+        
+        const_iterator end()
+        {
+            _data.cend();
+        }
+        
+        /**
+         * @brief:          Default constructor. 
+         * @description:    Initializes a new empty ColumnMajor array
+         */
+        Array2D()
+            : _data(), _format(ArrayFormat::COLUMN_MAJOR), _columns(0), _rows(0)
+        {
+        };
+        
+        /**
+         * @brief:          Constructor with format
+         * @description:    Initializes a new empty array with given format
+         * @param[in]:  format      format required from the array
+         */
+        Array2D(ArrayFormat format)
+            : _data(), _format(format), _columns(0), _rows(0)
         {
         };
 
         /**
-         * Initialize the size of the array and set data to 0
-         * @param nx
-         * @param ny
+         * @brief:          Constructor with size and format provided
+         * @description:    Initialize empty array of the size provided with
+         *                  data stored in the format provided.
+         * @param[in]   columns     number of columns
+         * @param[in]   rows        number of rows
+         * @param[in]   format      format for the storage of data
          */
-        ColumnMajorArray2D(const size_t& nx, const size_t& ny)
-            : _nx(nx), _ny(ny)
+        Array2D(const size_t& columns, 
+                const size_t& rows, 
+                ArrayFormat format=ArrayFormat::COLUMN_MAJOR)
+            :   _format(format), 
+                _columns(columns), 
+                _rows(rows)
         {
-            _data = new T[size()]();
+            _data = std::vector<T>(columns*rows, T());
         };
 
         /**
-         * Copy constructor. Deletes the old pointer and copies the new data to
-         * the newly created pointer.
-         * @param other
-         */
-        ColumnMajorArray2D(const ColumnMajorArray2D& other)
-        {
-            reset(other);
-        };
-
-        /**
-         * Destructor
-         */
-        ~ ColumnMajorArray2D()
-        {
-            if(_data != NULL) delete[] _data;
-        };
-
-        /*
-         * Defines equal to operator
-         */
-        virtual ColumnMajorArray2D& operator=(const ColumnMajorArray2D& rhs)
-        {
-            reset(rhs);
-            return *this;
-        };
-
-        /**
-         * Defines addition operator. Note that the addition should also be
-         * defined in the templated class.
-         * @param rhs : another instance with the same size
+         * @brief:          Defines addition operator. 
+         * @description:    Adds two arrays of same size.
+         *                  Note that the addition should also be
+         *                  defined in the templated class.
+         * @param[in]   rhs         another instance with the same size
          * @return added array
          */
-        virtual ColumnMajorArray2D operator+(const ColumnMajorArray2D& rhs) const
+        virtual Array2D operator+(const Array2D& rhs) const
         {
-            ColumnMajorArray2D<T> added(nx(), ny());
-            if( (rhs.nx() != nx()) || (rhs.ny() != ny()) )
-            {
-                std::cerr << "WARNING: Can't add arrays with different sizes\n\n";
-                std::cerr << "RHS Size(" << rhs.nx() << ", " << rhs.ny() << ", " 
-                          << ") does not match (" << nx() << ", " << ny() << ")\n";
-                return *this;
-            }
+            assert(columns() == rhs.columns());
+            assert(rows() == rhs.rows());
+            assert(format() == rhs.format());
 
-            for(int id=0; id < size(); id++)
-            {
-                added.set_data_at(id, data_at(id)+rhs.data_at(id));
-            }
+            Array2D result(columns(), rows(), format());
 
-            return added;
+            std::transform(begin(), end(), rhs.begin(), std::back_inserter(result._data), std::plus<T>());
+            return result;
         }
-
+        
         /**
-         * Defines multiplication with a double factor. Note that this
-         * operation should also be defined in the templated class
-         * @param factor
-         * @return array multiplied by the factor
+         * @brief:          Defines multiplication operator with a factor. 
+         * @description:    Multiplies each element of array with the factor
+         *                  Note that the multiplication should also be
+         *                  defined in the templated class.
+         * @param[in]   rhs         another instance with the same size
+         * @return modified array
          */
-        virtual ColumnMajorArray2D operator*(double factor) const
+        virtual Array2D operator*(const double& factor)
         {
-            ColumnMajorArray2D new_data(nx(), ny());
-            for(int id=0; id < size(); id++)
-            {
-                new_data.set_data_at(id, data_at(id)*factor);
-            }
-
-            return new_data;
+            std::for_each(begin(), end(), [](T val, double factor){return val*factor;});
         }
 
         /**
-         * Resets the data from the array provided
-         * @param other
-         */
-        virtual void reset(const ColumnMajorArray2D& other)
-        {
-            //Check if the object is different
-            if(this != &other)
-            {
-                set_data(other.nx(), other.ny(), other.data());
-            }
-        }
-
-        /**
-         * Deletes the current data
+         * @brief:          Empties the array
          */
         void clear()
         {
-            if(_data != NULL) delete _data;
-            _data = new T[size()]();
+            _data.clear();
+            _data = std::vector<T>(columns()*rows(), T());
         };
 
         /**
-         * Returns the total size of the memory allocated to the array
+         * @brief:              Returns the total size of the memory allocated 
+         *                      to the array
          * @return (size_t)
          */
         virtual size_t size() const
         {
-            return nx()*ny();
+            return _data.size();
         };
 
         /**
-         * Returns the number of rows, aka, size of the first dimension x
+         * @brief:              Returns the total number of columns
          * @return (size_t)
          */
-        size_t nx() const
+        size_t columns() const
         {
-            return _nx;
+            return _columns;
         };
 
         /**
-         * Returns the total number of columns, aka, size of the second dimension y
+         * @brief:              Returns the total number of rows
          * @return (size_t)
          */
-        size_t ny() const
+        size_t rows() const
         {
-            return _ny;
+            return _rows;
         };
-
+        
         /**
-         * Get the pointer to the data. User is responsible 
-         * for the safety of the data
-         * @return (pointer to data)
+         * @brief:              Returns the format of the storage
+         * @return 
          */
-        T* data() const
+        ArrayFormat format() const
         {
-            return _data;
-        };
+            return _format;
+        }
 
         /**
-         * Sets the new data with the new sizes provided. Note that the
-         * user is responsible for memory leak that can occur due to 
-         * wrongly allocated data pointer.
-         * @param nx
-         * @param ny
-         * @param data
+         * @brief:              Get the const pointer to the data
+         * @return const raw pointer to data
          */
-        void set_data(size_t nx, size_t ny, T* data)
+        const T* data() const
         {
-            _nx = nx;
-            _ny = ny;
-            if( _data != NULL ) delete[] _data;
-            _data = new T[size()]();
-            if(data != NULL) std::copy(data, data+size(), _data);
+            return _data.data();
         };
-
-
+        
         /**
-         * Fetches the data at the indices provided
-         * @param x : index in first dimension
-         * @param y : index in second dimension
-         * @return data
+         * @brief:          Get the pointer to the data
+         * @description:    User is responsible for modification of the data
+         * @return raw data pointer
          */
-        T data_at(size_t x, size_t y) const
+        T* data()
         {
-            if(indices_in_limit(x, y))
-            {
-               return _data[memory_id(x, y)];
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Fetching value got out of bound indices: " + std::to_string(x) + ", " + 
-                          std::to_string(y) + "\n");
-            }
+            return _data.data();
+        }
+
+        /**
+         * @brief:          Sets the new data with the new sizes provided. 
+         * @description:    Note that the user is responsible for memory leak 
+         *                  that can occur due to wrongly allocated data pointer.
+         * @param[in]   data    raw data pointer
+         */
+        void set_data(const T* data)
+        {
+            assert(_data != nullptr);
+            clear();
+            _data = std::vector<T>(data, data+size());
         };
 
         /**
-         * Fetches the data stored at the memory location provided
-         * @param id : index of the memory location
-         * @return data
+         * @brief           Fetches the data at the indices provided
+         * @param[in]   column  index in first dimension
+         * @param[in]   row     index in second dimension
+         * @return data value at the index
+         */
+        T data_at(size_t column, size_t row) const
+        {
+            assert(indices_in_limit(column, row) == true);
+            return _data[memory_id(column, row)];
+        };
+
+        /**
+         * @brief:          Fetches the data stored at the memory location provided
+         * @param[in]   id  index of the memory location
+         * @return data value
          */
         T data_at(size_t id) const
         {
-            if(id < size())
-            {
-               return _data[id];
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Fetching value got out of bound indices: " + std::to_string(id) + "\n");
-            }
+            assert(id < size());
+            return _data[id];
         };
 
         /**
-         * sets the data at the indices provided
-         * @param x : index in first dimension
-         * @param y : index in second dimension
-         * @param value
+         * @brief:          Sets the data at the indices provided
+         * @param   column  column index
+         * @param   row     row index
+         * @param   value   value at the index
          */
-        void set_data_at(int x, int y, T value)
+        void set_data_at(size_t column, size_t row, T value)
         {
-            if(indices_in_limit(x, y))
-            {
-                _data[memory_id(x, y)] = value;
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Setting value got out of bound indices: " + std::to_string(x) + ", " + 
-                          std::to_string(y) + "\n");
-            }
+            assert(indices_in_limit(column, row));
+            _data[memory_id(column, row)] = value;
         };
 
         /**
-         * Sets the value at the memory location provided
-         * @param id : index of the memory location
-         * @param value
+         * @brief:          Sets the value at the memory location provided
+         * @param   id      index of the memory location
+         * @param   value
          */
         void set_data_at(int id, T value)
         {
-            if(id < size())
-            {
-               _data[id] = value;
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Setting value got out of bound indices: " + std::to_string(id) + "\n");
-            }
+            assert(id < size());
+            _data[id] = value;
         };
 
     protected:
 
         /**
-         * Returns the memory location of the indices provided
-         * @param x
-         * @param y
+         * @brief           Returns the memory location of the indices provided
+         * @param   column  column index
+         * @param   row     row index
          * @return 
          */
-        size_t memory_id(size_t x, size_t y) const
+        size_t memory_id(size_t column, size_t row) const
         {
-            return ( x + (y*nx()) );
+            if(_format == ArrayFormat::COLUMN_MAJOR) return ( column + (row*columns()) );
+            else if(_format == ArrayFormat::ROW_MAJOR) return ( row + (column*rows()) );
+            else
+            {
+                std::cerr << "ERROR! Unrecognized array format";
+                return 0;
+            }
         };
 
         /**
-         * Checks if the provided indices are in limit.
-         * @param x
-         * @param y
+         * @brief           Checks if the provided indices are in limit.
+         * @param   column  column index
+         * @param   row     row index
          * @return 
          */
-        bool indices_in_limit(size_t x, size_t y) const
+        bool indices_in_limit(size_t column, size_t row) const
         {
             bool result = true;
-            if(x >= nx() || y >= ny())
+            if(column >= columns() || row >= rows())
             {
                 result = false;
             }
@@ -305,11 +309,9 @@ namespace em
             return result;
         };
 
-
-        size_t _nx;
-        size_t _ny;
-
-        T* _data;
+        size_t _columns, _rows;
+        ArrayFormat _format;
+        std::vector<T> _data;
     };
 }
 

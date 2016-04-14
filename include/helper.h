@@ -15,38 +15,7 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
-
-#include <iostream>
-#include <memory>
-
-#include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
-
-
-namespace em
-{
-    template<class value_t>
-    class Object
-    {
-    public:
-        
-        const ObjectProperties& properties() const
-        {
-            return _properties;
-        };
-        
-        ObjectProperties& properties()
-        {
-            return _properties;
-        };
-        
-    protected:
-        ObjectProperties _properties;
-    };
-}
-
-#endif /* OBJECT_HPP */
-
+#include "../src/helper/array2D.hpp"
+#include "../src/helper/array3D.hpp"
+#include "../src/helper/file.hpp"
+#include "../src/helper/binary_file.hpp"

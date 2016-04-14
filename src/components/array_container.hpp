@@ -15,38 +15,42 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
-
-#include <iostream>
-#include <memory>
+#ifndef ARRAYCONTAINER_HPP
+#define ARRAYCONTAINER_HPP
 
 #include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
+#include "../helper/array3D.hpp"
 
+namespace em {
 
-namespace em
-{
-    template<class value_t>
-    class Object
-    {
+    template<class T>
+    class ArrayContainer : public Container<T>, Array3D<T> {
     public:
-        
-        const ObjectProperties& properties() const
-        {
-            return _properties;
+        ArrayContainer();
+
+        Iterator<T> begin() override {
+            return _data.begin();
         };
         
-        ObjectProperties& properties()
-        {
-            return _properties;
+        Iterator<T> cbegin() const override {
+            return _data.cbegin();
         };
         
-    protected:
-        ObjectProperties _properties;
+        Iterator<T> end() override {
+            return _data.end();
+        };
+        
+        Iterator<T> cend() const override {
+            return _data.cend();
+        };
+
+        Container::Type container_type() const override {
+            return Container::Type::ARRAY;
+        };
+
+
+
     };
 }
 
-#endif /* OBJECT_HPP */
-
+#endif /* ARRAYCONTAINER_HPP */

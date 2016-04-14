@@ -15,38 +15,23 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
-
-#include <iostream>
-#include <memory>
-
-#include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
-
+#ifndef REPRESENTATION_HPP
+#define REPRESENTATION_HPP
 
 namespace em
 {
-    template<class value_t>
-    class Object
+    class Representation
     {
     public:
-        
-        const ObjectProperties& properties() const
+        enum class Type
         {
-            return _properties;
+            NONE, REAL_SPACE, RECIPROCAL_SPACE
         };
         
-        ObjectProperties& properties()
-        {
-            return _properties;
-        };
+        Type representation_type();
         
-    protected:
-        ObjectProperties _properties;
     };
 }
 
-#endif /* OBJECT_HPP */
+#endif /* INTERFACE_HPP */
 

@@ -1,334 +1,312 @@
 /* 
- * Author: Nikhil Biyani - nikhil(dot)biyani(at)gmail(dot)com
- *
- * This file is a part of 2dx.
+ * This file is a part of emkit.
  * 
- * 2dx is free software: you can redistribute it and/or modify
+ * emkit is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or any 
  * later version.
  * 
- * 2dx is distributed in the hope that it will be useful, but WITHOUT 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
- * License for more details <http://www.gnu.org/licenses/>.
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef COLUMN_MAJOR_ARRAY3D_HPP
-#define	COLUMN_MAJOR_ARRAY3D_HPP
+#ifndef ARRAY3D_HPP
+#define	ARRAY3D_HPP
 
 #include <iostream>
 #include <stdexcept>
+#include <cassert>
+#include <vector>
+#include <algorithm>
+#include <functional>
 
 namespace em
 {
     /**
-     * A class to store data 3D data in column major format.
-     * (like Fortran/MATLAB). The data can be traversed in either
-     * coordinates (x, y, z) or using the ids in which the data
-     * is stored in the memory.
+     * @brief:          A class to store data 3D data in array format.
+     * @description:    The data can either be stored in a column major or
+     *                  a row major format. Internally uses the std::vector
+     *                  class to store the data.
+     * @author:         Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
      */
-    template <class value_t>
-    class ColumnMajorArray3D
+    template <typename T>
+    class Array3D
     {
+        
     public:
+
+        /**
+         * @brief:          ENUM to define format in which the array is stored.
+         * @description:    Defines how the data is stored in the memory. For
+         *                  COLUMN_MAJOR the columns are fastest changing and 
+         *                  rows are slowest changing while in the
+         *                  ROW_MAJOR order the rows are fastest 
+         *                  changing and the columns are slowest changing.
+         * @author          Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+         */
+        enum class ArrayFormat
+        {
+            COLUMN_MAJOR, ROW_MAJOR
+        };
         
         /**
-         * Default constructor. Data pointer will point to NULL and the 
-         * sizes will be initialized by 0 
+         * @brief:          Default constructor. 
+         * @description:    Initializes a new empty ColumnMajor array
          */
-        ColumnMajorArray3D()
-            : _data(NULL), _nx(0), _ny(0), _nz(0)
+        Array3D()
+            : _data(), _format(ArrayFormat::COLUMN_MAJOR), _columns(0), _rows(0), _sections(0)
         {
         };
         
         /**
-         * Initialize the size of the array and set data to 0
-         * @param nx
-         * @param ny
-         * @param nz
+         * @brief:          Constructor with format
+         * @description:    Initializes a new empty array with given format
+         * @param[in]:  format      format required from the array
          */
-        ColumnMajorArray3D(const size_t& nx, const size_t& ny, const size_t& nz)
-            : _nx(nx), _ny(ny), _nz(nz)
+        Array3D(ArrayFormat format)
+            : _data(), _columns(0), _rows(0), _sections(0), _format(format)
         {
-            _data = new value_t[size()]();
-        };
-        
-        /**
-         * Copy constructor. Deletes the old pointer and copies the new data to
-         * the newly created pointer.
-         * @param other
-         */
-        ColumnMajorArray3D(const ColumnMajorArray3D& other)
-        {
-            reset(other);
-        };
-        
-        /**
-         * Destructor
-         */
-        ~ ColumnMajorArray3D()
-        {
-            if(_data != NULL) delete[] _data;
-        };
-        
-        /*
-         * Defines equal to operator
-         */
-        virtual ColumnMajorArray3D& operator=(const ColumnMajorArray3D& rhs)
-        {
-            reset(rhs);
-            return *this;
         };
 
         /**
-         * Defines addition operator. Note that the addition should also be
-         * defined in the templated class.
-         * @param rhs : another instance with the same size
+         * @brief:          Constructor with size and format provided
+         * @description:    Initialize empty array of the size provided with
+         *                  data stored in the format provided.
+         * @param[in]   columns     number of columns
+         * @param[in]   rows        number of rows
+         * @param[in]   sections    number of sections
+         * @param[in]   format      format for the storage of data
+         */
+        Array3D(const size_t& columns, 
+                const size_t& rows, 
+                const size_t& sections,
+                ArrayFormat format=ArrayFormat::COLUMN_MAJOR)
+            :   _format(format), 
+                _columns(columns), 
+                _rows(rows), _sections(sections)
+        {
+            _data = std::vector<T>(columns*rows*sections, T());
+        };
+
+        /**
+         * @brief:          Defines addition operator. 
+         * @description:    Adds two arrays of same size.
+         *                  Note that the addition should also be
+         *                  defined in the templated class.
+         * @param[in]   rhs         another instance with the same size
          * @return added array
          */
-        virtual ColumnMajorArray3D operator+(const ColumnMajorArray3D& rhs) const
+        virtual Array3D operator+(const Array3D& rhs) const
         {
-            ColumnMajorArray3D added(nx(), ny(), nz());
-            if( (rhs.nx() != nx()) || (rhs.ny() != ny()) || (rhs.nz() != nz()) )
-            {
-                std::cerr << "WARNING: Can't add arrays with different sizes\n\n";
-                std::cerr << "RHS Size(" << rhs.nx() << ", " << rhs.ny() << ", " << rhs.nz() 
-                          << ") does not match (" << nx() << ", " << ny() << ", " << nz() << ")\n";
-                return *this;
-            }
+            assert(columns() == rhs.columns());
+            assert(rows() == rhs.rows());
+            assert(sections() == rhs.sections());
+            assert(format() == rhs.format());
 
-            for(int id=0; id < size(); id++)
-            {
-                added.set_data_at(id, data_at(id)+rhs.data_at(id));
-            }
+            Array3D result(columns(), rows(), sections(), format());
 
-            return added;
-        }
-
-        /**
-         * Defines multiplication with a double factor. Note that this
-         * operation should also be defined in the templated class
-         * @param factor
-         * @return array multiplied by the factor
-         */
-        virtual ColumnMajorArray3D operator*(double factor) const
-        {
-            ColumnMajorArray3D new_data(nx(), ny(), nz());
-            for(int id=0; id < size(); id++)
-            {
-                new_data.set_data_at(id, data_at(id)*factor);
-            }
-
-            return new_data;
+            std::transform(_data.begin(), _data.end(), rhs._data.begin(), std::back_inserter(result._data), std::plus<T>());
+            return result;
         }
         
         /**
-         * Resets the data from the array provided
-         * @param other
+         * @brief:          Defines multiplication operator with a factor. 
+         * @description:    Multiplies each element of array with the factor
+         *                  Note that the multiplication should also be
+         *                  defined in the templated class.
+         * @param[in]   rhs         another instance with the same size
+         * @return modified array
          */
-        virtual void reset(const ColumnMajorArray3D& other)
+        virtual Array3D operator*(const double& factor)
         {
-            //Check if the object is different
-            if(this != &other)
-            {
-                set_data(other.nx(), other.ny(), other.nz(), other.data());
-            }
+            std::for_each(_data.begin(), _data.end(), [&](T val){return val*factor;});
         }
-        
+
         /**
-         * Deletes the current data
+         * @brief:          Empties the array
          */
         void clear()
         {
-            if(_data != NULL) delete _data;
-            _data = new value_t[size()]();
-        };
-        
-        /**
-         * Returns the total size of the memory allocated to the array
-         * @return (size_t)
-         */
-        size_t size() const
-        {
-            return nx()*ny()*nz();
-        };
-        
-        /**
-         * Returns the number of rows, aka, size of the first dimension x
-         * @return (size_t)
-         */
-        size_t nx() const
-        {
-            return _nx;
-        };
-        
-        /**
-         * Returns the total number of columns, aka, size of the second dimension y
-         * @return (size_t)
-         */
-        size_t ny() const
-        {
-            return _ny;
-        };
-        
-        /**
-         * Returns the total number of sections, aka, size of the third dimension z
-         * @return (size_t)
-         */
-        size_t nz() const
-        {
-            return _nz;
-        };
-        
-        /**
-         * Get the pointer to the data. User is responsible 
-         * for the safety of the data
-         * @return (pointer to data)
-         */
-        const value_t* data() const
-        {
-            return _data;
-        };
-        
-        /**
-         * Sets the new data with the new sizes provided. Note that the
-         * user is responsible for memory leak that can occur due to 
-         * wrongly allocated data pointer.
-         * @param nx
-         * @param ny
-         * @param nz
-         * @param data
-         */
-        void set_data(size_t nx, size_t ny, size_t nz, const value_t* data)
-        {
-            _nx = nx;
-            _ny = ny;
-            _nz = nz;
-            if( _data != NULL ) delete[] _data;
-            _data = new value_t[size()]();
-            if(data != NULL) std::copy(data, data+size(), _data);
-        };
-        
-        
-        /**
-         * Fetches the data at the indices provided
-         * @param x : index in first dimension
-         * @param y : index in second dimension
-         * @param z : index in third dimension
-         * @return data
-         */
-        value_t data_at(size_t x, size_t y, size_t z) const
-        {
-            if(indices_in_limit(x, y, z))
-            {
-               return _data[memory_id(x, y, z)];
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Fetching value got out of bound indices: " + std::to_string(x) + ", " + 
-                          std::to_string(y) + ", " + std::to_string(z) + "\n");
-            }
+            _data.clear();
+            _data = std::vector<T>(columns()*rows()*sections(), T());
         };
 
         /**
-         * Fetches the data stored at the memory location provided
-         * @param id : index of the memory location
-         * @return data
+         * @brief:              Returns the total size of the memory allocated 
+         *                      to the array
+         * @return (size_t)
          */
-        value_t data_at(size_t id) const
+        virtual size_t size() const
         {
-            if(id < size())
-            {
-               return _data[id];
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Fetching value got out of bound indices: " + std::to_string(id) + "\n");
-            }
+            return _data.size();
         };
 
         /**
-         * sets the data at the indices provided
-         * @param x : index in first dimension
-         * @param y : index in second dimension
-         * @param z : index in third dimension
-         * @param value
+         * @brief:              Returns the total number of columns
+         * @return (size_t)
          */
-        void set_data_at(int x, int y, int z, value_t value)
+        size_t columns() const
         {
-            if(indices_in_limit(x, y, z))
-            {
-                _data[memory_id(x, y, z)] = value;
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Setting value got out of bound indices: " + std::to_string(x) + ", " + 
-                          std::to_string(y) + ", " + std::to_string(z) + "\n");
-            }
+            return _columns;
         };
 
         /**
-         * Sets the value at the memory location provided
-         * @param id : index of the memory location
-         * @param value
+         * @brief:              Returns the total number of rows
+         * @return (size_t)
          */
-        void set_data_at(int id, value_t value)
+        size_t rows() const
         {
-            if(id < size())
-            {
-               _data[id] = value;
-            }
-            else
-            {
-                throw std::out_of_range
-                        ("ERROR! Setting value got out of bound indices: " + std::to_string(id) + "\n");
-            }
+            return _rows;
         };
         
         /**
-         * Checks if the provided indices are in limit.
-         * @param x
-         * @param y
-         * @param z
+         * @brief:              Returns the total number of sections
+         * @return (size_t)
+         */
+        size_t sections() const
+        {
+            return _sections;
+        };
+        
+        /**
+         * @brief:              Returns the format of the storage
+         * @return ArrayFormat
+         */
+        ArrayFormat format() const
+        {
+            return _format;
+        }
+
+        /**
+         * @brief:              Get the const pointer to the data
+         * @return const raw pointer to data
+         */
+        const T* data() const
+        {
+            return _data.data();
+        };
+        
+        /**
+         * @brief:          Get the pointer to the data
+         * @description:    User is responsible for modification of the data
+         * @return raw data pointer
+         */
+        T* data()
+        {
+            return _data.data();
+        }
+
+        /**
+         * @brief:          Sets the new data with the new sizes provided. 
+         * @description:    Note that the user is responsible for memory leak 
+         *                  that can occur due to wrongly allocated data pointer.
+         * @param[in]   data    raw data pointer
+         */
+        void set_data(const T* data)
+        {
+            assert(data != nullptr);
+            clear();
+            _data = std::vector<T>(data, data+size());
+        };
+
+        /**
+         * @brief           Fetches the data at the indices provided
+         * @param[in]   column  column index
+         * @param[in]   row     row index
+         * @param[in]   section section index
+         * @return data value at the index
+         */
+        T data_at(size_t column, size_t row, size_t section) const
+        {
+            assert(indices_in_limit(column, row, section) == true);
+            return _data[memory_id(column, row, section)];
+        };
+
+        /**
+         * @brief:          Fetches the data stored at the memory location provided
+         * @param[in]   id  index of the memory location
+         * @return data value
+         */
+        T data_at(size_t id) const
+        {
+            assert(id < size());
+            return _data[id];
+        };
+
+        /**
+         * @brief:          Sets the data at the indices provided
+         * @param   column  column index
+         * @param   row     row index
+         * @param   section section index
+         * @param   value   value at the index
+         */
+        void set_data_at(size_t column, size_t row, size_t section, T value)
+        {
+            assert(indices_in_limit(column, row, section));
+            _data[memory_id(column, row, section)] = value;
+        };
+
+        /**
+         * @brief:          Sets the value at the memory location provided
+         * @param   id      index of the memory location
+         * @param   value
+         */
+        void set_data_at(int id, T value)
+        {
+            assert(id < size());
+            _data[id] = value;
+        };
+
+    protected:
+
+        /**
+         * @brief           Returns the memory location of the indices provided
+         * @param   column  column index
+         * @param   row     row index
+         * @param   section section index
          * @return 
          */
-        bool indices_in_limit(size_t x, size_t y, size_t z) const
+        size_t memory_id(size_t column, size_t row, size_t section) const
+        {
+            if(_format == ArrayFormat::COLUMN_MAJOR) 
+                return ( column + (row*columns()) + (section*rows()*columns()) );
+            else if(_format == ArrayFormat::ROW_MAJOR) 
+                return ( section + (row*sections()) + column*sections()*rows() );
+            else
+            {
+                std::cerr << "ERROR! Unrecognized array format";
+                return 0;
+            }
+        };
+
+        /**
+         * @brief           Checks if the provided indices are in limit.
+         * @param   column  column index
+         * @param   row     row index
+         * @param   section section index
+         * @return 
+         */
+        bool indices_in_limit(size_t column, size_t row, size_t section) const
         {
             bool result = true;
-            if(x >= nx() || y >= ny() || z >= nz())
+            if(column >= columns() || row >= rows())
             {
                 result = false;
             }
 
             return result;
         };
-        
-    private:
-            
-        /**
-         * Returns the memory location of the indices provided
-         * @param x
-         * @param y
-         * @param z
-         * @return 
-         */
-        size_t memory_id(size_t x, size_t y, size_t z) const
-        {
-            return ( x + (y*nx()) + (z*ny()*nx()) );
-        };
 
-
-        size_t _nx;
-        size_t _ny;
-        size_t _nz;
-
-        value_t* _data;
+        size_t _columns, _rows, _sections;
+        ArrayFormat _format;
+        std::vector<T> _data;
     };
 }
 
 
-#endif	/* COLUMN_MAJOR_ARRAY3D_HPP */
+#endif	/* ARRAY3D_HPP */

@@ -1,17 +1,18 @@
 /* 
- * Author: Nikhil Biyani - nikhil(dot)biyani(at)gmail(dot)com
- *
- * This file is a part of 2dx.
+ * This file is a part of emkit.
  * 
- * 2dx is free software: you can redistribute it and/or modify
+ * emkit is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or any 
  * later version.
  * 
- * 2dx is distributed in the hope that it will be useful, but WITHOUT 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
- * License for more details <http://www.gnu.org/licenses/>.
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
 #ifndef BINARY_FILE_HPP
@@ -26,7 +27,9 @@
 namespace em
 {
     /**
-     * A wrapper class to Read and write the binary files
+     * @brief           A wrapper class to Read and write the binary files
+     * @description     
+     * @author          Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
      */
     class BinaryFile : public File
     {
@@ -37,29 +40,52 @@ namespace em
          * @param file_name
          * @param mode
          */
-        BinaryFile(const std::string& file_name, openmode mode = INPUT | OUTPUT);
+        BinaryFile(const std::string& file_name, openmode mode = INPUT | OUTPUT)
+            : File(file_name, mode | std::ios_base::binary)
+        {
+
+        };
         
         /**
-         * Reads an string of character size read_size from current position
-         * @param read_size (number of characters to be read)
+         * @brief           Reads an string of character size read_size 
+         *                  from current position
+         * @param   read_size       number of characters to be read
          * @return 
          */
-        std::string read_string(const int& read_size);
+        std::string read_string(const int& read_size)
+        {
+            char* temp = new char[read_size];
+            this->read(temp, read_size*sizeof(char));
+
+            std::string value = std::string(temp);
+            return value;
+        };
 
         /**
-         * Reads in an integer from the current position of the file
+         * @brief           Reads in an integer from the current position 
+         *                  of the file
          * @return int
          */
-        int read_int();
+        int read_int()
+        {
+            int value;
+            this->read((char*)&value, sizeof(int));
+
+            return value;
+        };
 
         /**
-         * Reads in a float from the current position of the file
+         * @brief           Reads in a float from the current position of 
+         *                  the file
          * @return float
          */
-        float read_float();
-        
-    private:
-        std::string _filename;
+        float read_float()
+        {
+            float value;
+            this->read((char*)&value, sizeof(float));
+    
+            return value;    
+        };
     };
 }
 

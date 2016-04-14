@@ -15,38 +15,21 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#ifndef ITERATOR_HPP
+#define ITERATOR_HPP
 
 #include <iostream>
-#include <memory>
-
-#include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
-
+#include <iterator>
 
 namespace em
 {
     template<class value_t>
-    class Object
+    class Iterator : public std::iterator<std::random_access_iterator_tag, value_t>
     {
-    public:
         
-        const ObjectProperties& properties() const
-        {
-            return _properties;
-        };
-        
-        ObjectProperties& properties()
-        {
-            return _properties;
-        };
-        
-    protected:
-        ObjectProperties _properties;
     };
 }
 
-#endif /* OBJECT_HPP */
+
+#endif /* ITERATOR_HPP */
 

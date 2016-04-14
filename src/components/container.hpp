@@ -15,38 +15,34 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#ifndef CONTAINER_HPP
+#define CONTAINER_HPP
 
-#include <iostream>
-#include <memory>
-
-#include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
+#include "iterator.hpp"
 
 
 namespace em
 {
     template<class value_t>
-    class Object
+    class Container
     {
     public:
         
-        const ObjectProperties& properties() const
+        enum class Type
         {
-            return _properties;
+            NONE, ARRAY, TABULAR, STACK
         };
         
-        ObjectProperties& properties()
-        {
-            return _properties;
-        };
+        virtual Iterator<value_t> begin();
+        virtual Iterator<value_t> end();
+        virtual Iterator<value_t> cbegin() const;
+        virtual Iterator<value_t> cend() const;
         
-    protected:
-        ObjectProperties _properties;
+        virtual Type container_type() const;
+            
+        
     };
 }
 
-#endif /* OBJECT_HPP */
+#endif /* CONTAINER_HPP */
 

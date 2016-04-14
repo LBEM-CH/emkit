@@ -33,7 +33,7 @@ namespace em
         
         void reset(const T& first, const T& second, const T& third)
         {
-            _tuple = std::make_tuple<T, T, T>(first, second, third);
+            _tuple = std::make_tuple(first, second, third);
         };
         
         void setFirst(const T& value)

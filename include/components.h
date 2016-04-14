@@ -1,0 +1,5 @@
+#include "../src/components/object_property.hpp"
+#include "../src/components/object_properties.hpp"
+#include "../src/components/iterator.hpp"
+#include "../src/components/container.hpp"
+#include "../src/components/array_container.hpp"
