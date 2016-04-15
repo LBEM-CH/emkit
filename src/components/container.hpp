@@ -23,7 +23,6 @@
 
 namespace em
 {
-    template<class value_t>
     class Container
     {
     public:
@@ -32,11 +31,6 @@ namespace em
         {
             NONE, ARRAY, TABULAR, STACK
         };
-        
-        virtual Iterator<value_t> begin();
-        virtual Iterator<value_t> end();
-        virtual Iterator<value_t> cbegin() const;
-        virtual Iterator<value_t> cend() const;
         
         virtual Type container_type() const;
             

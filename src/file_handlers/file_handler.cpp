@@ -1,14 +1,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "../helper/file.hpp"
+#include "../components/object.hpp"
 #include "file_handler.hpp"
 
-#include "../helper/file.hpp"
-#include "../components/object_base.hpp"
-#include "../components/object_type.hpp"
-#include "../components/object_factory.hpp"
-
-#include "mrc_file_handler.hpp"
+#include "mrc_file.hpp"
 
 using namespace em;
 
@@ -28,27 +25,6 @@ std::unique_ptr<FileHandler> FileHandler::create(std::string file_name, std::str
     else
     {
         std::cerr << "The file format not recognized.\n";
-    }
-}
-
-std::unique_ptr<ObjectBase> FileHandler::loadObject(ObjectType type)
-{
-    if(!loadHeader() || !loadData())
-    {
-        throw std::runtime_error("Was not able to load the file.");
-    }
-    
-    return _object->convertTo(type);
-}
-
-
-void FileHandler::saveObject(const std::unique_ptr<ObjectBase>& object) 
-{
-    _object = object->convertTo(_object->objectType());
-    
-    if(!saveHeader() || !saveData())
-    {
-        throw std::runtime_error("Was not able to save the file.");
     }
 }
 

@@ -6,18 +6,16 @@
  */
 
 #ifndef EMFILE_BASE_HPP
-#define	EMFILE_BASE_HPP
+#define EMFILE_BASE_HPP
 
 #include <iostream>
 #include <string>
 #include <memory>
 
-#include "../components/object_type.hpp"
+namespace em {
 
-namespace em
-{
-    class ObjectBase;
-    
+    class Object;
+
     /**
      * A generalized (abstract) EMFile class which has factory methods to load
      * and save file which occur in Electron Microscopy. The subclasses should
@@ -26,16 +24,16 @@ namespace em
      * 
      * loadHeader, loadData, saveHeader, saveData
      */
-    class FileHandler
-    {
+    class FileHandler {
     public:
-        
-        FileHandler(std::string fileName) : _fileName (fileName){};
-        
+
+        FileHandler(std::string fileName) : _fileName(fileName) {
+        };
+
         /***********************************
          * FACTORY METHODS
          ***********************************/
-        
+
         /**
          * FACTORY CREATOR of the correct EMFile using the format.
          * @param[in]   file_name   name with path of the file
@@ -44,35 +42,35 @@ namespace em
          *                          detect the format.
          * @return  The correct EMFile instance 
          */
-        static std::unique_ptr<FileHandler> create(std::string file_name, std::string format="");
-        
+        static std::unique_ptr<FileHandler> create(std::string file_name, std::string format = "");
+
         /***********************************
          * TEMPLATE METHODS
          ***********************************/
-        
+
         /**
          * Loads an object from the file of the specified type. Internally first
          * loads an object and then converts it to the type specified, produces
          * an error if the conversion is not possible
          * @return  The object of specified type
          */
-        virtual std::unique_ptr<ObjectBase> loadObject() = 0;
-        
+        virtual std::unique_ptr<Object> loadObject() = 0;
+
         /**
          * Saves the given object to the file. Internally first converts the 
          * given object to the compatible type and then saves it. It will produce
          * run time error if the conversion is not possible.
          * @param[in]   object  the object which is to be saved.
          */
-        virtual void saveObject(const std::unique_ptr<ObjectBase>& object) = 0;
-        
-        
+        virtual void saveObject(const std::unique_ptr<Object>& object) = 0;
+
+
     protected:
-        
+
         std::string _fileName;
-        
+
     };
 }
 
-#endif	/* EMFILE_HPP */
+#endif /* EMFILE_HPP */
 

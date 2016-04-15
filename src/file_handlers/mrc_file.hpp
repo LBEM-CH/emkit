@@ -1,80 +1,53 @@
+/* 
+ * This file is a part of emkit.
+ * 
+ * emkit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or any 
+ * later version.
+ * 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ */
+
 #ifndef MRC_FILE_HPP
 #define MRC_FILE_HPP
 
-#include "file_handler.hpp"
+#include <iostream>
+#include <fstream>
+
 #include "../helper/binary_file.hpp"
-#include "../components/volume.hpp"
-#include "../components/volume_data.hpp"
 
-namespace em
-{
-    class MRCFile : public FileHandler
-    {
+#include "file_handler.hpp"
+
+namespace em {
+
+    class MRCFile : public FileHandler {
     public:
-        MRCFile(std::string fileName)
-            : FileHandler(fileName)
-        {
-        }
+
+        MRCFile(std::string fileName);
+
+
+        std::unique_ptr<Object> loadObject() override;
         
-        /**
-         * Loads the MRC Header
-         * @return 
-         */
-        bool loadHeader() const;
-        
-        
-        bool loadData() const
-        {
-            if(_mode != 2)
-            {
-                    std::cerr << "ERROR while reading MRC file:\n"
-                              << "\t" << _fileName << "\n"
-                              << "The data format (MRC mode:" << _mode << ") not supported!\n"
-                              << "HINT:\n Only MRC mode - 2 is supported.\n"
-                              << "If you don't have mode 2 please open the image in Chimera and store it as MRC.\n";
-                    exit(1);
-            }
+        void saveObject(const std::unique_ptr<Object>& object) override;
 
-            em::BinaryFile infile(_fileName, em::File::INPUT);
 
-            //Check for the presence of file
-            if (!infile.exists()){
-                std::cerr << "File not found: " << _fileName << std::endl;
-                exit(1);
-            }
-
-            size_t input_size = _rows*_columns*_sections;
-            size_t file_size = infile.file_size();
-            size_t memory_size = (int)(file_size - 1024)/4;
-
-            if(memory_size < input_size)
-            {
-                std::cerr << "ERROR while reading file:\n"
-                          << "\t" << _fileName << "\n"
-                          << "Error reading data, input data is less than expected.\n"
-                          << "\tExpected size: (" << _columns << "X" << _rows << "X" << _sections << ") " << input_size <<"\n"
-                          << "\tData size in file: " << memory_size << "\n";       
-                exit(1);
-            }
-
-            infile.seekg (1024, std::ios::beg);
-
-            char* rawData = new char[input_size*sizeof(int)];
-            infile.read(rawData, input_size*sizeof(int));
-
-            Array3D<double> array(_columns, _rows, _sections);
-            array.set_data((double*)(float*) rawData);
-            _data = VolumeData(_columns, _rows, _sections, VolumeData::VolumeType::REAL);
-            _data.setData(array, VolumeData::VolumeType::REAL);
-            
-            delete[] rawData;
-
-        };
-
-        
-        
     private:
+
+        bool loadHeader(BinaryFile& infile);
+
+        bool loadData(BinaryFile& infile, char* raw_data);
         
+        bool saveHeader(BinaryFile& outfile);
+        
+        bool saveData(BinaryFile& outfile, const char* data);
+
         /**
          * Mode for the storage of data
          */
@@ -84,18 +57,18 @@ namespace em
          * Start locations
          */
         int _nxstart, _nystart, _nzstart;
-        
+
         /**
          * Number of rows, columns and sections of the volume
          */
         int _rows, _columns, _sections;
-        
+
         /**
          * Grid size.
          * The pixel/A is defined as xlen/mx, ylen/my, zlen/mz
          */
         int _mx, _my, _mz;
-        
+
         /**
          * Axis corresponding to columns, rows, sections
          */
@@ -114,9 +87,7 @@ namespace em
          * Default: 90
          */
         double _alpha, _beta, _gamma;
-        
-        VolumeData _data;
-        
+
     };
 }
 

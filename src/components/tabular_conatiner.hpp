@@ -24,7 +24,7 @@
 namespace em {
     
     template<class value_t>
-    class TabularContainer : public Container<value_t>, std::map<Triplet<int>, std::vector<value_t>> {
+    class TabularContainer : public Container, std::map<Triplet<int>, std::vector<value_t>> {
         
     public:
         

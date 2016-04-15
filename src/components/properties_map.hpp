@@ -15,37 +15,41 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECT_PROPERTIES_HPP
-#define OBJECT_PROPERTIES_HPP
+#ifndef PROPERTIES_MAP_HPP
+#define PROPERTIES_MAP_HPP
 
-#include "object_property.hpp"
+
+#include <string>
+#include <map>
+
+#include "property.hpp"
 
 
 namespace em
 {
-    class ObjectProperties
+    class PropertiesMap
     {
     public:
         
-        register_property(std::string name, std::string value)
+        void register_property(std::string name, std::string value)
         {
-            ObjectProperty property();
+            Property property;
             property.set_value(value);
-            _properties.insert(std::pair<std::string, ObjectProperty>(name, property) );
+            _properties[name] = property;
         };
         
-        register_property(std::string name, ObjectProperty property)
+        void register_property(std::string name, Property property)
         {
-            _properties.insert(std::pair<std::string, ObjectProperty>(name, property) );
+            _properties[name] = property;
         };
         
-        ObjectProperty get_property(std::string name)
+        Property get_property(std::string name)
         {
             return _properties[name];
         };
         
     private:
-        std::map<std::string, ObjectProperty> _properties;
+        std::map<std::string, Property> _properties;
     };
 }
 

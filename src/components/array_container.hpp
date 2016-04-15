@@ -24,24 +24,15 @@
 namespace em {
 
     template<class T>
-    class ArrayContainer : public Container<T>, Array3D<T> {
+    class ArrayContainer : public Container, public Array3D<T> {
     public:
-        ArrayContainer();
 
-        Iterator<T> begin() override {
-            return _data.begin();
+        ArrayContainer()
+        : Container(), Array3D<T>() {
         };
-        
-        Iterator<T> cbegin() const override {
-            return _data.cbegin();
-        };
-        
-        Iterator<T> end() override {
-            return _data.end();
-        };
-        
-        Iterator<T> cend() const override {
-            return _data.cend();
+
+        ArrayContainer(size_t columns, size_t rows, size_t sections)
+        : Container(), Array3D<T>(columns, rows, sections) {  
         };
 
         Container::Type container_type() const override {

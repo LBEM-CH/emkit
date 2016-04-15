@@ -21,30 +21,38 @@
 #include <iostream>
 #include <memory>
 
+#include "properties_map.hpp"
 #include "container.hpp"
-#include "object_properties.hpp"
-#include "representation.hpp"
 
 
-namespace em
-{
-    template<class value_t>
-    class Object
-    {
+namespace em {
+
+    class Object {
     public:
-        
-        const ObjectProperties& properties() const
-        {
+
+        const PropertiesMap& properties() const {
             return _properties;
         };
-        
-        ObjectProperties& properties()
-        {
+
+        PropertiesMap& properties() {
             return _properties;
         };
-        
+
+        const Container& container() const {
+            return _container;
+        };
+
+        Container& container() {
+            return _container;
+        };
+
+        void set_container(const Container& c) {
+            _container = c;
+        };
+
     protected:
-        ObjectProperties _properties;
+        Container _container;
+        PropertiesMap _properties;
     };
 }
 

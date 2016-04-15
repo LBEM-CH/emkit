@@ -18,6 +18,10 @@
 #ifndef REAL_SPACE_REPRESENTATION_HPP
 #define REAL_SPACE_REPRESENTATION_HPP
 
+#include <memory>
+
+#include "../helper/tripet.hpp"
+
 #include "representation.hpp"
 
 
@@ -37,13 +41,7 @@ namespace em {
         
         virtual size_t number_of_voxels() const = 0;
         
-        virtual value_t mean() const = 0;
-        
-        virtual value_t min() const = 0;
-        
-        virtual value_t max() const = 0;
-        
-        virtual ReciprocalSpaceRepresentation<value_t> get_fourier() const = 0;
+        virtual std::unique_ptr<ReciprocalSpaceRepresentation<value_t>> get_fourier() const = 0;
         
     };
 }

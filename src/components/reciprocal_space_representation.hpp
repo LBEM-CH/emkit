@@ -1,14 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
- * File:   reciprocal_space_representation.hpp
- * Author: biyanin
- *
- * Created on April 14, 2016, 5:46 PM
+ * This file is a part of emkit.
+ * 
+ * emkit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or any 
+ * later version.
+ * 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
 #ifndef RECIPROCAL_SPACE_REPRESENTATION_HPP

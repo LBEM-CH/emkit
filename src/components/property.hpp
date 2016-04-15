@@ -15,8 +15,8 @@
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
  */
 
-#ifndef OBJECTPROPERTY_HPP
-#define OBJECTPROPERTY_HPP
+#ifndef PROPERTY_HPP_VBCG92
+#define PROPERTY_HPP_VBCG92
 
 #include <iostream>
 #include <string>
@@ -24,16 +24,16 @@
 namespace em
 {
     
-    class ObjectProperty
+    class Property
     {
     public:
-        ObjectProperty()
+        Property()
         {
             _value_set = false;
             _has_default = false;
         };
         
-        ObjectProperty(std::string value, std::string default_value)
+        Property(std::string value, std::string default_value)
         {
             set_value(value);
             set_default(default_value);
@@ -65,7 +65,7 @@ namespace em
             return std::stof(value());
         };
         
-        bool has_value_set()
+        bool has_value_set() const
         {
             return _value_set;
         }
