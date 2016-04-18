@@ -13,23 +13,23 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef REPRESENTATION_HPP
 #define REPRESENTATION_HPP
 
-namespace em
-{
-    class Representation
-    {
+namespace em {
+
+    class Representation {
     public:
-        enum class Type
-        {
+
+        enum class Type {
             NONE, REAL_SPACE, RECIPROCAL_SPACE
         };
-        
+
         Type representation_type();
-        
+
     };
 }
 

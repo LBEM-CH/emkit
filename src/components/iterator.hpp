@@ -22,9 +22,10 @@
 #include <iostream>
 #include <iterator>
 
+#include "type_recognizer.hpp"
+
 namespace em {
 
-    template<class value_t>
     class Iterator : public std::iterator<std::random_access_iterator_tag, value_t> {
     };
 }

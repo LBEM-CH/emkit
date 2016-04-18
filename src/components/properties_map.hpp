@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef PROPERTIES_MAP_HPP
@@ -25,29 +26,25 @@
 #include "property.hpp"
 
 
-namespace em
-{
-    class PropertiesMap
-    {
+namespace em {
+
+    class PropertiesMap {
     public:
-        
-        void register_property(std::string name, std::string value)
-        {
+
+        void register_property(std::string name, std::string value) {
             Property property;
             property.set_value(value);
             _properties[name] = property;
         };
-        
-        void register_property(std::string name, Property property)
-        {
+
+        void register_property(std::string name, Property property) {
             _properties[name] = property;
         };
-        
-        Property get_property(std::string name)
-        {
+
+        Property get_property(std::string name) {
             return _properties[name];
         };
-        
+
     private:
         std::map<std::string, Property> _properties;
     };

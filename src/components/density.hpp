@@ -20,6 +20,7 @@
 #define DENSITY_HPP
 
 #include "object.hpp"
+#include "type_recognizer.hpp"
 #include "real_space_representation.hpp"
 #include "array_container.hpp"
 #include "reciprocal_space_representation.hpp"
@@ -27,8 +28,7 @@
 
 namespace em {
 
-    template<class value_t>
-    class DensityObject : public Object, public RealSpaceRepresentation<value_t> {
+    class DensityObject : public Object, public RealSpaceRepresentation {
     public:
 
         DensityObject();
@@ -36,7 +36,7 @@ namespace em {
         DensityObject(size_t columns, size_t rows, size_t sections);
 
         value_t density_at(Triplet<int> v) const override {
-            return container().data_at(v.first(), v.second(), v.third());
+            return _container.data_at(v.first(), v.second(), v.third());
         };
 
         void set_density_at(Triplet<int> v, value_t value) override {
@@ -47,14 +47,29 @@ namespace em {
             return _container.size();
         };
 
-        std::unique_ptr<ReciprocalSpaceRepresentation<value_t>> get_fourier() const override {
+        std::unique_ptr<ReciprocalSpaceRepresentation> get_fourier() const override {
 
         };
-        
-        Container& container() override
-        {
-            return 
+
+        const Container& container() const override {
+            return _container;
         };
+
+        Container& container() override {
+            return _container;
+        };
+
+        void set_container(const Container& c) override {
+            if (c.container_type() == Container::Type::ARRAY) {
+                _container = *(static_cast<const ArrayContainer*>(&c));
+            } else {
+                throw std::invalid_argument("The container type does not match the object type\n");
+            }
+        };
+
+
+    private:
+        ArrayContainer _container;
 
 
     };

@@ -13,42 +13,44 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef RECIPROCAL_SPACE_REPRESENTATION_HPP
 #define RECIPROCAL_SPACE_REPRESENTATION_HPP
 
+#include <iostream>
+#include <memory>
+
 #include "representation.hpp"
+#include "type_recognizer.hpp"
 #include "../helper/miller_index.hpp"
 
-
 namespace em {
-    
-    template<class value_t>
+
     class RealSpaceRepresentation;
-    
-    template<class T>
+
     class ReciprocalSpaceRepresentation : public Representation {
-        
     public:
-        virtual T amplitude_at(const MillerIndex& index) const = 0;
-        
-        virtual T phase_at(const MillerIndex& index) const = 0;
-        
-        virtual void set_amplitude_at(const MillerIndex& index, T value) = 0;
-        
-        virtual void set_phase_at(const MillerIndex& index, T value) = 0;
-        
+        virtual value_t amplitude_at(const MillerIndex& index) const = 0;
+
+        virtual value_t phase_at(const MillerIndex& index) const = 0;
+
+        virtual void set_amplitude_at(const MillerIndex& index, value_t value) = 0;
+
+        virtual void set_phase_at(const MillerIndex& index, value_t value) = 0;
+
         virtual bool exists(const MillerIndex& index) const = 0;
-        
+
         virtual size_t number_Of_reflections() const = 0;
-        
+
         virtual MillerIndex max_allowed_index() const = 0;
-        
+
         virtual MillerIndex min_allowed_index() const = 0;
-            
+
+        virtual std::unique_ptr<RealSpaceRepresentation> get_real() const = 0;
     };
-    
+
 }
 
 #endif /* RECIPROCAL_SPACE_REPRESENTATION_HPP */

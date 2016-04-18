@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef PROPERTY_HPP_VBCG92
@@ -21,69 +22,58 @@
 #include <iostream>
 #include <string>
 
-namespace em
-{
-    
-    class Property
-    {
+namespace em {
+
+    class Property {
     public:
-        Property()
-        {
+
+        Property() {
             _value_set = false;
             _has_default = false;
         };
-        
-        Property(std::string value, std::string default_value)
-        {
+
+        Property(std::string value, std::string default_value) {
             set_value(value);
             set_default(default_value);
         };
-        
-        std::string value() const
-        {
-            if(_value_set) return _value;
-            else if(_has_default) return _default;
-            else
-            {
+
+        std::string value() const {
+            if (_value_set) return _value;
+            else if (_has_default) return _default;
+            else {
                 std::cerr << "WARNING: No property value or it's default set, still returning something!!\n";
                 return "";
             }
         };
-        
-        int int_value() const
-        {
+
+        int int_value() const {
             return std::stoi(value());
         };
-        
-        double double_value() const
-        {
+
+        double double_value() const {
             return std::stod(value());
         };
-        
-        float float_value() const
-        {
+
+        float float_value() const {
             return std::stof(value());
         };
-        
-        bool has_value_set() const
-        {
+
+        bool has_value_set() const {
             return _value_set;
         }
-        
-        void set_default(std::string value)
-        {
+
+        void set_default(std::string value) {
             _has_default = true;
             _default = value;
         };
-        
-        void set_value(std::string value)
-        {
+
+        void set_value(std::string value) {
             _value_set = true;
             _value = value;
         };
-            
+
     private:
-            
+
         std::string _value;
         std::string _default;
         bool _value_set;

@@ -38,7 +38,7 @@ std::unique_ptr<Object> MRCFile::loadObject() {
     if(!loadHeader(infile)) {std::cerr << "Error in loading header from file: " + _fileName; exit(1);}
 
     if (_mode == 2) {
-        object = std::unique_ptr<DensityObject<float>>(new DensityObject<float>(_columns, _rows, _sections));
+        object = std::unique_ptr<DensityObject>(new DensityObject(_columns, _rows, _sections));
         object->properties().register_property("rows", std::to_string(_rows));
         object->properties().register_property("columns", std::to_string(_columns));
         object->properties().register_property("sections", std::to_string(_sections));
@@ -58,13 +58,13 @@ std::unique_ptr<Object> MRCFile::loadObject() {
         object->properties().register_property("mapr", std::to_string(_mapr));
         object->properties().register_property("maps", std::to_string(_maps));
 
-        auto c = ArrayContainer<float>(_columns, _rows, _sections);
+        auto c = ArrayContainer(_columns, _rows, _sections);
 
         char* raw_data;
 
         if(!loadData(infile, raw_data)){ std::cerr << "Error in loading data from file: " + _fileName; exit(1);}
 
-        c.set_data((float*) raw_data);
+        c.set_data((double*)(float*) raw_data);
 
         delete[] raw_data;
 

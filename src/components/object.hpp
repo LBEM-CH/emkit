@@ -39,20 +39,13 @@ namespace em {
             return _properties;
         };
 
-        virtual const Container& container() const {
-            return _container;
-        };
+        virtual const Container& container() const = 0;
 
-        virtual Container& container() {
-            return _container;
-        };
+        virtual Container& container() = 0;
 
-        virtual void set_container(const Container& c) {
-            _container = c;
-        };
+        virtual void set_container(const Container& c) = 0;
 
     protected:
-        Container _container;
         PropertiesMap _properties;
     };
 }

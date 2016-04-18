@@ -20,20 +20,20 @@
 #define ARRAYCONTAINER_HPP
 
 #include "container.hpp"
+#include "type_recognizer.hpp"
 #include "../helper/array3D.hpp"
 
 namespace em {
 
-    template<class T>
-    class ArrayContainer : public Container, public Array3D<T> {
+    class ArrayContainer : public Container, public Array3D<value_t> {
     public:
 
         ArrayContainer()
-        : Container(), Array3D<T>() {
+        : Container(), Array3D<value_t>() {
         };
 
         ArrayContainer(size_t columns, size_t rows, size_t sections)
-        : Container(), Array3D<T>(columns, rows, sections) {
+        : Container(), Array3D<value_t>(columns, rows, sections) {
         };
 
         Container::Type container_type() const override {

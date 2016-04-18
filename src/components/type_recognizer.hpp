@@ -16,28 +16,18 @@
  * 
  */
 
-#ifndef TABULARCONATINER_HPP
-#define TABULARCONATINER_HPP
-
-#include "container.hpp"
-#include "type_recognizer.hpp"
-#include "../helper/tripet.hpp"
+#ifndef TYPE_RECOGNIZER_HPP
+#define TYPE_RECOGNIZER_HPP
 
 namespace em {
 
-    class TabularContainer : public Container, std::map<Triplet<int>, std::vector<value_t>> {
-    public:
+#ifdef TDX_USE_FLOAT
+    typedef float value_t;
+#else
+    typedef double value_t;
+#endif
 
-        typedef std::map < Triplet<int>, std::vector<value_t> SortedTable;
-
-        TabularContainer();
-
-        Container::Type container_type() const override {
-            return Container::Type::TABULAR;
-        };
-
-    };
 }
 
-#endif /* TABULARCONATINER_HPP */
+#endif /* TYPE_RECOGNIZER_HPP */
 

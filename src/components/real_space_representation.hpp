@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef REAL_SPACE_REPRESENTATION_HPP
@@ -22,27 +23,25 @@
 
 #include "../helper/tripet.hpp"
 
+#include "type_recognizer.hpp"
 #include "representation.hpp"
 
 
 namespace em {
-    
-    template <class value_t>       
+
     class ReciprocalSpaceRepresentation;
-    
-    template<class value_t>
+
     class RealSpaceRepresentation : public Representation {
-        
     public:
-        
+
         virtual value_t density_at(Triplet<int> v) const = 0;
-        
+
         virtual void set_density_at(Triplet<int> v, value_t value) = 0;
-        
+
         virtual size_t number_of_voxels() const = 0;
-        
-        virtual std::unique_ptr<ReciprocalSpaceRepresentation<value_t>> get_fourier() const = 0;
-        
+
+        virtual std::unique_ptr<ReciprocalSpaceRepresentation> get_fourier() const = 0;
+
     };
 }
 
