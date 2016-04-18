@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef ITERATOR_HPP
@@ -21,12 +22,10 @@
 #include <iostream>
 #include <iterator>
 
-namespace em
-{
+namespace em {
+
     template<class value_t>
-    class Iterator : public std::iterator<std::random_access_iterator_tag, value_t>
-    {
-        
+    class Iterator : public std::iterator<std::random_access_iterator_tag, value_t> {
     };
 }
 

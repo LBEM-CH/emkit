@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef OBJECT_HPP
@@ -38,15 +39,15 @@ namespace em {
             return _properties;
         };
 
-        const Container& container() const {
+        virtual const Container& container() const {
             return _container;
         };
 
-        Container& container() {
+        virtual Container& container() {
             return _container;
         };
 
-        void set_container(const Container& c) {
+        virtual void set_container(const Container& c) {
             _container = c;
         };
 

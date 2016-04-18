@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef ARRAYCONTAINER_HPP
@@ -32,7 +33,7 @@ namespace em {
         };
 
         ArrayContainer(size_t columns, size_t rows, size_t sections)
-        : Container(), Array3D<T>(columns, rows, sections) {  
+        : Container(), Array3D<T>(columns, rows, sections) {
         };
 
         Container::Type container_type() const override {

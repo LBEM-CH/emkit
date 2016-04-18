@@ -13,6 +13,7 @@
  * 
  * Author:
  * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
  */
 
 #ifndef CONTAINER_HPP
@@ -21,20 +22,18 @@
 #include "iterator.hpp"
 
 
-namespace em
-{
-    class Container
-    {
+namespace em {
+
+    class Container {
     public:
-        
-        enum class Type
-        {
+
+        enum class Type {
             NONE, ARRAY, TABULAR, STACK
         };
-        
+
         virtual Type container_type() const;
-            
-        
+
+
     };
 }
 
