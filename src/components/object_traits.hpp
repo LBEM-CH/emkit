@@ -16,28 +16,22 @@
  * 
  */
 
-#ifndef TABULARCONATINER_HPP
-#define TABULARCONATINER_HPP
+#ifndef OBJECT_TRAITS_HPP
+#define OBJECT_TRAITS_HPP
 
-#include "container.hpp"
-#include "type_recognizer.hpp"
-#include "../helper/tripet.hpp"
+#include <iostream>
+#include <memory>
+
 
 namespace em {
 
-    class TabularContainer : public Container, std::map<Triplet<int>, std::vector<value_t>> {
+    template <typename object_type>
+    class object_traits {
     public:
-
-        typedef std::map < Triplet<int>, std::vector<value_t> SortedTable;
-
-        TabularContainer();
-
-        Container::Type container_type() const override {
-            return Container::Type::TABULAR;
-        };
-
+        typedef typename object_type::object_type_tag object_type_tag;
+        typedef typename object_type::container_type container_type;
     };
 }
 
-#endif /* TABULARCONATINER_HPP */
+#endif /* OBJECT_HPP */
 

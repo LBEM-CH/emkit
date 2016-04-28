@@ -29,21 +29,31 @@ namespace em
      * Also provides handy methods to directly set/get amplitudes and
      * phases.
      */
+    template<typename ValueType_>
     class Complex
     {
     public:
+        
+        typedef typename ValueType_ value_type;
+        typedef typename std::add_lvalue_reference<ValueType_> reference;
 
         /**
          * Default constructor which initializes to 0 + 0i 
          */
-        Complex();
+        Complex()
+        : complex_(0,0){
+            
+        };
 
         /**
          * Constructor with real and imag part
          * @param real
          * @param imag
          */
-        Complex(double real, double imag);
+        Complex(value_type real, value_type imag) 
+        : complex_(0, 0){
+            
+        };
 
         /**
          * Operator overloading of = operator.
@@ -51,7 +61,10 @@ namespace em
          * @param rhs
          * @return equated instance
          */
-        Complex& operator=(const Complex& rhs);
+        Complex& operator=(const Complex& rhs) {
+            complex_ = rhs.complex_;
+            return *this;
+        };
 
         /**
          * Operator overloading of + operator.
@@ -59,21 +72,35 @@ namespace em
          * @param rhs
          * @return modified this object
          */
-        Complex operator+(const Complex& rhs);
+        Complex operator+(const Complex& rhs) const {
+            return complex_ + rhs.complex_;
+        };
 
         /**
          * Declaration of multiplication of a double with complex2dx
          * @param factor
          * @return 
          */
-        Complex operator*(double factor);
+        template<typename ArithmeticType_>
+        Complex operator*(ArithmeticType_ factor) const{
+            static_assert(std::is_arithmetic<ArithmeticType_>::value, "The rhs should be of arithmetic type.");
+            return Complex(real()*factor, imag()*factor);
+        };
+        
+        template<typename ArithmeticType_>
+        Complex& operator*=(ArithmeticType_ factor) const{
+            *this = (*this)*factor;
+            return *this;
+        };
 
         /**
          * Declaration of multiplication of a Complex with another Complex
          * @param another complex
          * @return multiplied complex
          */
-        Complex operator*(const Complex& other);
+        Complex operator*(const Complex& other) const{
+            return complex_ * other.complex_;
+        };
 
         /**
          * Operator overloading of < operator
@@ -81,7 +108,9 @@ namespace em
          * @param rhs
          * @return result of this < rhs? 
          */
-        bool operator<(const Complex& rhs) const;
+        bool operator<(const Complex& rhs) const {
+            return amplitude() < rhs.amplitude();
+        };
 
         /**
          * Operator overloading of ==
@@ -89,93 +118,95 @@ namespace em
          * @param rhs
          * @return result of this == rhs
          */
-        bool operator==(const Complex& rhs) const;
+        bool operator==(const Complex& rhs) const {
+            return complex_ == rhs.complex_;
+        };
 
         /**
          * Returns the real part of the complex
          * @return real
          */
-        double real() const;
+        reference real(){
+            return complex_.real();
+        };
+        
+        const reference real() const {
+            return complex_.real();
+        }
 
         /**
          * Returns the imag part of the complex
          * @return 
          */
-        double imag() const;
+        reference imag() {
+            return complex_.imag();
+        };
+        
+        const reference imag() const {
+            return complex_.imag();
+        }
 
         /**
          * Evaluates and returns the amplitude of the complex
          * @return amplitude
          */
-        double amplitude() const;
+        value_type amplitude() const {
+            return std::abs(complex_);
+        };
 
         /**
          * Evaluates and returns the phase of the complex
          * @return phase in radians
          */
-        double phase() const;
+        value_type phase() const {
+            return std::arg(complex_);
+        };
 
         /**
          * Evaluates the intensity of the complex
          * @return intensity
          */
-        double intensity() const;
-
-        /**
-         * Changes/Sets the real part of the complex
-         * @param real
-         */
-        void set_real(double real);
-
-        /**
-         * Changes/Sets the imaginary part of the complex
-         * @param imag
-         */
-        void set_imag(double imag);
+        value_type intensity() const {
+            return std::norm(complex_);
+        };
 
         /**
          * Changes the amplitude of the complex with the given value
          * @param amplitude
          */
-        void set_amplitude(double amplitude);
+        void set_amplitude(value_type amplitude) {
+            value_type current_amplitude = this->amplitude();
+            if(current_amplitude != 0.0) *this *= (amplitude/current_amplitude);
+            
+        };
 
         /**
          * Changes the phase of the complex with the given value
          * @param phase in radians
          */
-        void set_phase(double phase);
+        void set_phase(value_type phase) {
+            double current_amplitude = this->amplitude();
+            complex_ = std::complex<value_type>(current_amplitude*cos(phase), current_amplitude*sin(phase));
+        };
 
         /**
          * Returns the conjugate of the current complex
          * @return Complex conjugate
          */
-        Complex conjugate();
+        Complex conjugate() {
+            return std::conj(complex_);
+        };
 
 
     private:
 
-        /**
-         * Member initializer function with real and imag values
-         * @param real
-         * @param imag
-         */
-        void initialize(double real, double imag);
-
-        /**
-         * Real part of the complex number
-         */
-        double _real;
-
-        /**
-         * Imaginary part of the complex number
-         */
-        double _imag;
+        std::complex<ValueType_> complex_;
 
 
 
-    }; // class Complex2dx
+    }; 
 
-} // namespace volume_processing_2dx
+} 
 
 #endif	/* COMPLEX2DX_HPP */
 

@@ -44,6 +44,10 @@ namespace em {
         Property get_property(std::string name) {
             return _properties[name];
         };
+        
+        void clear() {
+            _properties.clear();
+        }
 
     private:
         std::map<std::string, Property> _properties;

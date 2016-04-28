@@ -1,54 +1,67 @@
-/* 
- * This file is a part of emkit.
- * 
- * emkit is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or any 
- * later version.
- * 
- * emkit is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
- * License for more details <http://www.gnu.org/licenses/>
- * 
- * Author:
- * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
- * 
- */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#ifndef EM_OBJECT_HPP
+#define EM_OBJECT_HPP
 
 #include <iostream>
-#include <memory>
 
 #include "properties_map.hpp"
-#include "container.hpp"
-
+#include "../multidim/tensor_traits.hpp"
 
 namespace em {
 
-    class Object {
+    template <typename TensorContainer_>
+    class ObjectBase {
     public:
+        typedef typename TensorContainer_ container_type;
+        static const int rank = multidim::tensor_traits<container_type>::rank;
+        typedef typename multidim::tensor_traits<container_type>::index_type index_type;
+        typedef typename multidim::tensor_traits<container_type>::range_type range_type;
+        typedef typename multidim::tensor_traits<container_type>::size_type size_type;
+        typedef typename multidim::tensor_traits<container_type>::value_type value_type;
+        typedef typename multidim::tensor_traits<container_type>::iterator iterator;
+        typedef typename multidim::tensor_traits<container_type>::const_iterator const_iterator;
+        typedef typename multidim::tensor_traits<container_type>::reference reference;
+        typedef typename multidim::tensor_traits<container_type>::const_reference const_reference;
+        typedef typename multidim::tensor_traits<container_type>::pointer pointer;
+        typedef typename multidim::tensor_traits<container_type>::difference_type difference_type;
 
-        const PropertiesMap& properties() const {
-            return _properties;
+        /**
+         * Constructors
+         */
+        ObjectBase()
+        : container_() {
         };
+
+        ObjectBase(const container_type& container)
+        : container_(container) {
+        };
+
+        ObjectBase(const ObjectBase& other)
+        : container_(other.container_), properties_(other.properties_) {
+        }
 
         PropertiesMap& properties() {
-            return _properties;
+            return properties_;
         };
 
-        virtual const Container& container() const = 0;
+        const PropertiesMap& properties() const {
+            return properties_;
+        };
 
-        virtual Container& container() = 0;
+        container_type& container() {
+            return container_;
+        };
 
-        virtual void set_container(const Container& c) = 0;
+        const container_type& container() const {
+            return container_;
+        };
 
-    protected:
-        PropertiesMap _properties;
+    private:
+        container_type container_;
+        PropertiesMap properties_;
+
     };
 }
 
-#endif /* OBJECT_HPP */
+#endif
 
