@@ -266,7 +266,7 @@ namespace em {
 
             const Tensor<value_type, rank_ - 1 > & slice(typename index_type::value_type slice_number) const {
                 static_assert(rank_ > 1, "The rank should be more than 1 for slicing");
-                assert(slice_number < range[rank_ - 1]);
+                assert(slice_number < range_[rank_ - 1]);
                 Range < rank_ - 1 > slice_range;
                 for (int i = 0; i < rank_ - 1; ++i) slice_range[i] = range_[i];
                 return Tensor<value_type, rank_ - 1 > (slice_range, container_.data() + slice_number * stride()[rank_ - 1]);

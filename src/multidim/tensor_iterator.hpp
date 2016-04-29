@@ -8,6 +8,7 @@
 #include <type_traits>
 
 #include "tensor.hpp"
+#include "index_value_pair.hpp"
 
 namespace em {
     namespace multidim {
@@ -27,9 +28,9 @@ namespace em {
             static const StorageOrder storage_order = order_;
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
-            using value_type = std::pair<index_type, ValueType_>;
-            using pointer = std::pair<index_type, ValueType_>*;
-            using reference = std::pair<index_type, ValueType_>&;
+            using value_type = IndexValuePair<ValueType_, rank_>;
+            using pointer = value_type*;
+            using reference = value_type&;
 
             TensorIterator()
             : tensor_container_(), index_(0) {
@@ -42,9 +43,9 @@ namespace em {
             TensorIterator(const Self_& other) = default;
             
             ~TensorIterator() {
-                if(pair_initialized_) {
-                    tensor_container_->at(pair_.first) = pair_.second;
-                }
+                //if(pair_initialized_) {
+                //    tensor_container_->at(pair_.first) = pair_.second;
+                //}
             }
 
             /*
@@ -107,7 +108,7 @@ namespace em {
             }
 
             Self_& operator+=(const difference_type& __n) {
-                index += __n;
+                index_ += __n;
                 return *this;
             }
 
@@ -139,11 +140,11 @@ namespace em {
         protected:
             
             void rebook_pair(size_type index) {
-                if(pair_initialized_) {
-                    tensor_container_->at(pair_.first) = pair_.second;
-                }
+                //if(pair_initialized_) {
+                //    tensor_container_->at(pair_.first) = pair_.second;
+                //}
                 index_type idx = order_arranger_type::map(index, tensor_container_->range());
-                pair_ = std::make_pair(idx, tensor_container_->at(idx));
+                pair_ = value_type(idx, &tensor_container_->at(idx));
                 pair_initialized_ = true;
             }
             

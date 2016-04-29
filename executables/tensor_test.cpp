@@ -20,18 +20,30 @@ int main(int argc, char** argv) {
     
     image[{1,2}] = 4.34;
     
-    std::cout << "Now printing\n";
+    std::cout << "Initial\n";
     
-    for(auto itr = image.begin(); itr != image.end(); ++itr) {
-        itr->second = 1.0;
+    for(const auto& itr : image) {
+        std::cout << itr.index() << " -> " << itr.value() <<std::endl;
     }
     
+    for(auto itr = image.begin(); itr != image.end(); ++itr) {
+        itr->value() = 1.0;
+    }
+    
+    std::cout << "First attempt\n";
+    
+    for(const auto& itr : image) {
+        std::cout << itr.index() << " -> " << itr.value() <<std::endl;
+    }
+    
+    std::cout << "Second attempt\n";
+    
     for(auto& itr : image) {
-        itr.second = 2.0;
+        itr.value() = 2.0;
     } 
     
     for(const auto& itr : image) {
-        std::cout << itr.first << " -> " << itr.second <<std::endl;
+        std::cout << itr.index() << " -> " << itr.value() <<std::endl;
     }
     
     std::cout << "\n";
