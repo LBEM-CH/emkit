@@ -1,6 +1,6 @@
 
-#ifndef EM_MULTIDIM_FORMAT_HELPER_HPP
-#define EM_MULTIDIM_FORMAT_HELPER_HPP
+#ifndef EM_MULTIDIM_STORAGE_ORDER_HPP
+#define EM_MULTIDIM_STORAGE_ORDER_HPP
 
 #include <iostream>
 #include <cassert>
@@ -8,19 +8,22 @@
 #include <type_traits>
 
 #include "range.hpp"
-#include "tensor_format.hpp"
-
-
 
 namespace em {
     namespace multidim {
 
-        template<int rank_, TensorFormat format_>
-        class FormatHelper {
+        enum class StorageOrder {
+            COLUMN_MAJOR,   //FORTRAN/MATLAB LIKE 
+            ROW_MAJOR       //C++ LIKE
+        };
+        
+        
+        template<int rank_, StorageOrder format_>
+        class StorageOrderArranger {
         public:
 
             static const int kRank = rank_;
-            static const TensorFormat kFormat = format_;
+            static const StorageOrder kFormat = format_;
             using IndexType = Index<rank_>;
             using RangeType = Range<rank_>;
             using MemoryIdType = typename RangeType::value_type;
@@ -43,10 +46,10 @@ namespace em {
         };
 
         template<int rank_>
-        class FormatHelper<rank_, TensorFormat::COLUMN_MAJOR> {
+        class StorageOrderArranger<rank_, StorageOrder::COLUMN_MAJOR> {
         public:
             static const int kRank = rank_;
-            static const TensorFormat kFormat = TensorFormat::COLUMN_MAJOR;
+            static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
             using IndexType = Index<rank_>;
             using RangeType = Range<rank_>;
             using MemoryIdType = typename RangeType::value_type;
@@ -77,7 +80,7 @@ namespace em {
                 IndexType strides;
                 for (int idx = rank_ - 1; idx >= 0; --idx) {
                     strides[idx] = 1;
-                    for (int idx_inner = idx - 1; idx_inner <= 0; --idx_inner) {
+                    for (int idx_inner = idx - 1; idx_inner >= 0; --idx_inner) {
                         strides[idx] *= range[idx_inner];
                     }
                 }
@@ -87,10 +90,10 @@ namespace em {
         };
 
         template<int rank_>
-        class FormatHelper<rank_, TensorFormat::ROW_MAJOR> {
+        class StorageOrderArranger<rank_, StorageOrder::ROW_MAJOR> {
         public:
             static const int kRank = rank_;
-            static const TensorFormat kFormat = TensorFormat::COLUMN_MAJOR;
+            static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
             using IndexType = Index<rank_>;
             using RangeType = Range<rank_>;
             using MemoryIdType = typename RangeType::value_type;
@@ -133,5 +136,5 @@ namespace em {
     }
 }
 
-#endif /* INDEX_INCREMENTER_HPP */
+#endif 
 

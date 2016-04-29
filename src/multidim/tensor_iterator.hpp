@@ -7,97 +7,199 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "index.hpp"
-#include "tensor_traits.hpp"
+#include "tensor.hpp"
 
 namespace em {
     namespace multidim {
 
-        template<typename TensorType_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_>
         class TensorIterator {
+        protected:
+            typedef TensorIterator<ValueType_, rank_, order_> Self_;
+            typedef Tensor<ValueType_, rank_, order_> TensorType_;
+            typedef Index<rank_> index_type;
+            typedef Range<rank_> range_type;
+            typedef typename index_type::size_type size_type;
+            typedef StorageOrderArranger<rank_, order_> order_arranger_type;
+
         public:
-
-            typedef typename tensor_traits<TensorType_>::index_type index_type;
-            using range_type = typename tensor_traits<TensorType_>::range_type;
-            using size_type = typename tensor_traits<TensorType_>::size_type;
-            using value_type = typename tensor_traits<TensorType_>::value_type;
-            using format_helper_type = typename tensor_traits<TensorType_>::format_helper_type;
-
-            using Self_ = TensorIterator<TensorType_>;
-            using tensor_type = TensorType_;
-            using tensor_container_pointer = std::add_pointer<tensor_type>;
-
-            /*
-             * For std::iterator_traits to behave correctly
-             */
-            using iterator_category = std::bidirectional_iterator_tag;
+            static const size_t rank = rank_;
+            static const StorageOrder storage_order = order_;
+            using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
-            using pointer = std::pair<index_type, value_type>*;
-            using reference = std::pair<index_type, value_type>&;
+            using value_type = std::pair<index_type, ValueType_>;
+            using pointer = std::pair<index_type, ValueType_>*;
+            using reference = std::pair<index_type, ValueType_>&;
 
             TensorIterator()
-            : container_(), _index(0) {
+            : tensor_container_(), index_(0) {
             }
 
-            TensorIterator(tensor_container_pointer base_ptr, index_type index)
-            : container_(base_ptr), _index(index) {
+            TensorIterator(TensorType_* base_ptr, size_type index)
+            : tensor_container_(base_ptr), index_(index) {
             }
 
             TensorIterator(const Self_& other) = default;
-
-            Self_& operator=(const Self_& rhs) {
-                _index = rhs._index;
-                container_ = rhs.container_;
-                return *this;
+            
+            ~TensorIterator() {
+                if(pair_initialized_) {
+                    tensor_container_->at(pair_.first) = pair_.second;
+                }
             }
 
-            reference operator*() const {
-                index_type idx = format_helper_type::map(_index, container_->range());
-                return std::make_pair(idx, container_[_index]);
+            /*
+             * Forward iterator requirements
+             */
+
+            Self_& operator=(const Self_& rhs) = default;
+
+            reference operator*() {
+                rebook_pair(index_);
+                return pair_;
             }
 
-            pointer operator->() const {
-                index_type idx = format_helper_type::map(_index, container_->range());
-                return std::addressof(std::make_pair(idx, container_[_index]));
+            pointer operator->() {
+                rebook_pair(index_);
+                return &pair_;
             }
 
             Self_& operator++() {
-                _index++;
+                index_++;
                 return *this;
             }
 
             Self_ operator++(int increment) const {
                 Self_ temp = *this;
-                temp._index += increment;
+                temp.index_ += increment;
                 return temp;
             }
+            
+            bool operator==(const Self_& rhs) const {
+                return (tensor_container_ == rhs.tensor_container_ && index_ == rhs.index_);
+            }
+
+            bool operator!=(const Self_& rhs) const {
+                return (tensor_container_ != rhs.tensor_container_ || index_ != rhs.index_);
+            }
+
+            /**
+             * Bidirectional iterator requirements 
+             */
 
             Self_& operator--() {
-                _index++;
+                index_--;
                 return *this;
             }
 
             Self_ operator--(int decrement) const {
                 Self_ temp = *this;
-                temp._index -= decrement;
+                temp.index_ -= decrement;
                 return temp;
             }
 
-            bool operator==(const Self_& rhs) const {
-                return (container_ == rhs.container_ && _index == rhs._index);
+            /**
+             * Random access iterator requirements
+             */
+
+            reference operator[](const difference_type& __n) const {
+                rebook_pair(index_ + __n);
+                return pair_;
             }
 
-            bool operator!=(const Self_& rhs) const {
-                return (container_ != rhs.container_ || _index != rhs._index);
+            Self_& operator+=(const difference_type& __n) {
+                index += __n;
+                return *this;
             }
 
+            Self_ operator+(const difference_type& __n) const {
+                Self_ temp = *this;
+                temp.index_ += __n;
+                return temp;
+            }
 
+            Self_& operator-=(const difference_type& __n) {
+                index_ -= __n;
+                return *this;
+            }
 
-        private:
-            size_type _index;
-            tensor_container_pointer container_;
+            Self_ operator-(const difference_type& __n) const {
+                Self_ temp = *this;
+                temp.index_ -= __n;
+                return temp;
+            }
+
+            TensorType_* base() {
+                return tensor_container_;
+            }
+
+            size_type index() {
+                return index_;
+            }
+
+        protected:
+            
+            void rebook_pair(size_type index) {
+                if(pair_initialized_) {
+                    tensor_container_->at(pair_.first) = pair_.second;
+                }
+                index_type idx = order_arranger_type::map(index, tensor_container_->range());
+                pair_ = std::make_pair(idx, tensor_container_->at(idx));
+                pair_initialized_ = true;
+            }
+            
+            size_type index_;
+            TensorType_* tensor_container_;
+            value_type pair_;
+            bool pair_initialized_ = false;
 
         };
+
+        // Forward iterator requirements
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator==(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return (__lhs.base() == __rhs.base() && __lhs.index() == __rhs.index());
+        }
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator!=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return (__lhs.base() != __rhs.base() || __lhs.index() != __rhs.index());
+        }
+
+        // Random access iterator requirements
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator<(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return __lhs.index() < __rhs.index();
+        }
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator>(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return __lhs.index() > __rhs.index();
+        }
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator<=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return __lhs.index() <= __rhs.index();
+        }
+
+        template<typename ValueType_, int rank_, StorageOrder order_>
+        inline bool
+        operator>=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+            return __lhs.index() >= __rhs.index();
+        }
+
     }
 }
 

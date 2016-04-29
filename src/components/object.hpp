@@ -5,38 +5,30 @@
 #include <iostream>
 
 #include "properties_map.hpp"
-#include "../multidim/tensor_traits.hpp"
 
 namespace em {
 
-    template <typename TensorContainer_>
-    class ObjectBase {
+    template <typename ValueType_, size_t rank_>
+    class Object {
     public:
-        typedef typename TensorContainer_ container_type;
-        static const int rank = multidim::tensor_traits<container_type>::rank;
-        typedef typename multidim::tensor_traits<container_type>::index_type index_type;
-        typedef typename multidim::tensor_traits<container_type>::range_type range_type;
-        typedef typename multidim::tensor_traits<container_type>::size_type size_type;
-        typedef typename multidim::tensor_traits<container_type>::value_type value_type;
-        typedef typename multidim::tensor_traits<container_type>::iterator iterator;
-        typedef typename multidim::tensor_traits<container_type>::const_iterator const_iterator;
-        typedef typename multidim::tensor_traits<container_type>::reference reference;
-        typedef typename multidim::tensor_traits<container_type>::const_reference const_reference;
-        typedef typename multidim::tensor_traits<container_type>::pointer pointer;
-        typedef typename multidim::tensor_traits<container_type>::difference_type difference_type;
+        typedef typename multidim::Tensor<ValueType_, rank_> container_type;
+        static const int rank = container_type::rank;
+        typedef typename multidim::Index<rank_> index_type;
+        typedef typename multidim::Range<rank_> range_type;
+        typedef typename ValueType_ value_type;
 
         /**
          * Constructors
          */
-        ObjectBase()
+        Object()
         : container_() {
         };
 
-        ObjectBase(const container_type& container)
+        Object(const container_type& container)
         : container_(container) {
         };
 
-        ObjectBase(const ObjectBase& other)
+        Object(const Object& other)
         : container_(other.container_), properties_(other.properties_) {
         }
 

@@ -9,17 +9,17 @@
 namespace em {
 
     template<typename APHValueType_, size_t rank_>
-    class ComplexObject : public ObjectBase<multidim::Tensor<Complex<APHValueType_>, rank_>>, public FourierSapceInterface {
+    class ComplexObject : public Object<Complex<APHValueType_>,rank_>, public FourierSapceInterface {
     public:
         
-        typedef typename ObjectBase<multidim::Tensor<Complex<APHValueType_>, rank_>> container_type;
+        typedef typename Object<multidim::Tensor<Complex<APHValueType_>, rank_>> base_type;
         
         ComplexObject()
-        : container_type() {
+        : base_type() {
         };
 
-        ComplexObject(const container_type::container_type& container)
-        : container_type(container) {
+        ComplexObject(const base_type::container_type& container)
+        : base_type(container) {
         };
 
         ComplexObject(const ComplexObject& other) = default;

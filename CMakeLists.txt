@@ -28,4 +28,4 @@ message("${CMAKE_SOURCE_DIR}/lib/mrcfile")
 #==============================#
 add_library(emkit ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
-#add_subdirectory(executables)
+add_subdirectory(executables)

@@ -15,15 +15,15 @@
 namespace em {
     namespace multidim {
 
-        template<typename ValueType_, size_t rank_ = 1, TensorFormat format_ = TensorFormat::COLUMN_MAJOR>
+        template<typename ValueType_, size_t rank_ = 1, StorageOrder format_ = StorageOrder::COLUMN_MAJOR>
         class MappedTensor {
         public:
             
             static const int rank = rank_;
-            static const TensorFormat format = format_;
+            static const StorageOrder format = format_;
             using index_type = Index<rank_>;
             using range_type = Range<rank_>;
-            using format_helper_type = FormatHelper<rank_, format_>;
+            using format_helper_type = StorageOrderArranger<rank_, format_>;
             using data_container_type = std::map<size_type, ValueType_>;
             using self_ = MappedTensor<ValueType_, rank_, format_>;
             using value_type = ValueType_;
