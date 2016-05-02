@@ -81,7 +81,7 @@ namespace em {
             }
 
             reference operator[](const index_type& idx) {
-                return const_cast<reference> (static_cast<const Tensor<value_type, rank_> &> (*this).operator[](idx));
+                return const_cast<reference> (static_cast<const Tensor<value_type, rank_, order_> &> (*this).operator[](idx));
             }
 
             const_reference at(const index_type& idx) const {
@@ -92,6 +92,26 @@ namespace em {
             reference at(const index_type& idx) {
                 size_type memory_id = order_arranger::map(idx, range_);
                 return container_.at(memory_id);
+            }
+            
+            const_reference operator[](const size_type& idx) const {
+                assert(range_.size() > idx);
+                return container_[idx];
+            }
+
+            reference operator[](const size_type& idx) {
+                assert(range_.size() > idx);
+                return container_[idx];
+            }
+
+            const_reference at(const size_type& idx) const {
+                assert(range_.size() > idx);
+                return container_.at(idx);
+            }
+            
+            reference at(const size_type& idx) {
+                assert(range_.size() > idx);
+                return container_.at(idx);
             }
 
             const pointer data() const {

@@ -41,12 +41,6 @@ namespace em {
             }
 
             TensorIterator(const Self_& other) = default;
-            
-            ~TensorIterator() {
-                //if(pair_initialized_) {
-                //    tensor_container_->at(pair_.first) = pair_.second;
-                //}
-            }
 
             /*
              * Forward iterator requirements
@@ -140,18 +134,13 @@ namespace em {
         protected:
             
             void rebook_pair(size_type index) {
-                //if(pair_initialized_) {
-                //    tensor_container_->at(pair_.first) = pair_.second;
-                //}
                 index_type idx = order_arranger_type::map(index, tensor_container_->range());
-                pair_ = value_type(idx, &tensor_container_->at(idx));
-                pair_initialized_ = true;
+                pair_ = value_type(idx, &tensor_container_->at(index));
             }
             
             size_type index_;
             TensorType_* tensor_container_;
             value_type pair_;
-            bool pair_initialized_ = false;
 
         };
 

@@ -103,7 +103,7 @@ namespace em {
                 IndexType idx;
                 MemoryIdType temp_id = id;
                 IndexType strides = get_stride(range);
-                for(int i=rank_-1; i>=0; --i){
+                for(int i=0; i<rank_; ++i){
                     idx[i] = temp_id/strides[i];
                     temp_id -= idx[i] * strides[i];
                 }
