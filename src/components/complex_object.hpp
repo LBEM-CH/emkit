@@ -12,13 +12,13 @@ namespace em {
     class ComplexObject : public Object<Complex<APHValueType_>,rank_>, public FourierSapceInterface {
     public:
         
-        typedef typename Object<multidim::Tensor<Complex<APHValueType_>, rank_>> base_type;
+        typedef Object<Complex<APHValueType_>,rank_> base_type;
         
         ComplexObject()
         : base_type() {
         };
 
-        ComplexObject(const base_type::container_type& container)
+        ComplexObject(const typename base_type::container_type& container)
         : base_type(container) {
         };
 

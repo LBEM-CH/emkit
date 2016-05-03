@@ -36,6 +36,11 @@ namespace em {
             set_value(value);
             set_default(default_value);
         };
+        
+        friend inline std::ostream& operator<<(std::ostream& os, const Property& property) {
+            os << property.value();
+            return os;
+        }
 
         std::string value() const {
             if (_value_set) return _value;
@@ -83,4 +88,3 @@ namespace em {
 
 
 #endif /* OBJECTPROPERTY_HPP */
-

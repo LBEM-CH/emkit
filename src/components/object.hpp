@@ -4,6 +4,9 @@
 
 #include <iostream>
 
+#include "../multidim/tensor.hpp"
+#include "../multidim/index.hpp"
+#include "../multidim/range.hpp"
 #include "properties_map.hpp"
 
 namespace em {
@@ -15,7 +18,7 @@ namespace em {
         static const int rank = container_type::rank;
         typedef typename multidim::Index<rank_> index_type;
         typedef typename multidim::Range<rank_> range_type;
-        typedef typename ValueType_ value_type;
+        typedef ValueType_ value_type;
 
         /**
          * Constructors

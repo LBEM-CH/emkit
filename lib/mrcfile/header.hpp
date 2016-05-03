@@ -1,3 +1,20 @@
+/* 
+ * This file is a part of emkit.
+ * 
+ * emkit is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or any 
+ * later version.
+ * 
+ * emkit is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public 
+ * License for more details <http://www.gnu.org/licenses/>
+ * 
+ * Author:
+ * Nikhil Biyani: nikhil(dot)biyani(at)gmail(dot)com
+ * 
+ */
 
 #ifndef HEADER_HPP_HC343PL
 #define HEADER_HPP_HC343PL
@@ -11,6 +28,8 @@
 
 #include "format_specifier.hpp"
 #include "byte_swapper.hpp"
+#include "header_value.hpp"
+#include "header_property.hpp"
 
 namespace mrc {
 
@@ -19,36 +38,36 @@ namespace mrc {
      */
     class Header {
     public:
-
-        Header()
-        : _format(FormatSpecifier()),  _swap_byte_order(false) {
-        };
         
-        Header(FormatSpecifier format)
+        Header(FormatSpecifier format = FormatSpecifier())
         : _format(format), _swap_byte_order(false) {
-            _fields = _format.header_fields();
-            if (std::find(_fields.begin(), _fields.end(), "mode") == _fields.end()
-                    || std::find(_fields.begin(), _fields.end(), "columns") == _fields.end()
-                    || std::find(_fields.begin(), _fields.end(), "rows") == _fields.end()
-                    || std::find(_fields.begin(), _fields.end(), "sections") == _fields.end()) {
+            _values = _format.header_properties();
+            if (std::find(_values.begin(), _values.end(), "mode") == _values.end()
+                    || std::find(_values.begin(), _values.end(), "columns") == _values.end()
+                    || std::find(_values.begin(), _values.end(), "rows") == _values.end()
+                    || std::find(_values.begin(), _values.end(), "sections") == _values.end()) {
                 std::cerr << "ERROR: MRC Format specifier error:\n"
                         << "mode/columns/rows/sections fields are required in format specification.\n";
                 exit(1);
             }
             
             //Set the default mode to 2
-            set("mode", 2);
+            set("mode", "2");
         };
 
         bool load(std::ifstream& is) {
             is.seekg(_format.header_offset(), is.beg);
-            _values.clear();
-            _values.resize(_fields.size());
-            is.read((char*) _values.data(), _values.size() * sizeof (float));
 
-            int bitMask = (int) get("mapc") | (int) get("mapr") | (int) get("maps");
+            for(auto& v : _values) {
+                v.set_value(is);
+            }
+            
+            int bitMask = std::stoi(get("mapc")) | std::stoi(get("mapr")) | std::stoi(get("maps"));
             if (bitMask == 3 || bitMask == 0) _swap_byte_order = false;
-            else _swap_byte_order = true;
+            else {
+                std::cout << "NOTE: Swap Byte Order is marked true.\n";
+                _swap_byte_order = true;
+            }
 
             if (_swap_byte_order) {
                 for (int i = 0; i < 256; i++) ByteSwapper::byte_swap(&_values[i], sizeof(float));
@@ -62,52 +81,57 @@ namespace mrc {
 
         bool save(std::ofstream& os) {
             os.seekp(_format.header_offset(), os.beg);
-            os.write((char*) _values.data(), _values.size() * sizeof (float));
+            
+            for(const auto& v : _values) {
+                v.write_value(os);
+            }
 
             if (os) return true;
             else return false;
         }
 
         int mode() {
-            return (int) get("mode");
+            return std::stoi(get("mode"));
         };
         
         size_t data_points() {
-            return (size_t) (get("columns") * get("rows") * get("sections"));
+            return (size_t) (std::stoi(get("columns")) 
+                    * std::stoi(get("rows")) 
+                    * std::stoi(get("sections")) );
         }
 
         bool should_swap_endianness() {
             return _swap_byte_order;
         }
 
-        float get(std::string field) const {
-            auto found_field = std::find(_fields.begin(), _fields.end(), field);
-            if (found_field == _fields.end()) {
+        std::string get(std::string field) const {
+            const auto& found_field = std::find(_values.begin(), _values.end(), field);
+            if (found_field == _values.end()) {
                 std::cerr << "Warning: The requested field (" << field << ") not found in header specification returning 0\n";
                 std::cerr << "Following are the allowed values:\n";
-                for (auto f : _fields) std::cerr << f << std::endl;
-                return 0.0;
+                for (const auto& f : _values) std::cerr << f.identifier() << std::endl;
+                return "";
             } else {
-                return _values[std::distance(_fields.begin(), found_field)];
+                return _values[std::distance(_values.begin(), found_field)].value();
             }
         };
         
-        std::map<std::string, float> get_all() const {
-            std::map<std::string, float> values_map;
-            for(auto f : _fields) {
-                values_map.emplace(f, get(f));
+        std::vector<std::pair<std::string, std::string>> get_all() const {
+            std::vector<std::pair<std::string, std::string>> values_map;
+            for(const auto& f : _values) {
+                values_map.push_back(std::make_pair(f.identifier(), f.value()));
             }
             return values_map;
         }
 
-        void set(std::string field, float value) {
-            auto found_field = std::find(_fields.begin(), _fields.end(), field);
-            if (found_field == _fields.end()) {
-                std::cerr << "Warning: The requested field (" << field << ") not found in header specification, doing nothing\n";
+        void set(const std::string& field, const std::string& value) {
+            const auto& found_field = std::find(_values.begin(), _values.end(), field);
+            if (found_field == _values.end()) {
+                std::cerr << "Warning: The requested field (" << field << ") not found in header specification returning 0\n";
                 std::cerr << "Following are the allowed values:\n";
-                for (auto f : _fields) std::cerr << f << std::endl;
+                for (const auto& f : _values) std::cerr << f.identifier() << std::endl;
             } else {
-                _values[std::distance(_fields.begin(), found_field)] = value;
+                _values[std::distance(_values.begin(), found_field)].set_value(value);
             }
         };
 
@@ -115,8 +139,7 @@ namespace mrc {
 
         FormatSpecifier _format;
         bool _swap_byte_order;
-        std::vector<std::string> _fields;
-        std::vector<float> _values;
+        std::vector<HeaderProperty> _values;
     };
 }
 

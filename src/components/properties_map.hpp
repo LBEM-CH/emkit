@@ -19,9 +19,9 @@
 #ifndef PROPERTIES_MAP_HPP
 #define PROPERTIES_MAP_HPP
 
-
+#include <iostream>
 #include <string>
-#include <map>
+#include <vector>
 
 #include "property.hpp"
 
@@ -34,23 +34,35 @@ namespace em {
         void register_property(std::string name, std::string value) {
             Property property;
             property.set_value(value);
-            _properties[name] = property;
+            register_property(name, property);
         };
 
         void register_property(std::string name, Property property) {
-            _properties[name] = property;
+            _properties.push_back(std::make_pair(name, property));
         };
 
-        Property get_property(std::string name) {
-            return _properties[name];
+        Property get_property(std::string name) const {
+            for(const auto& prop : _properties) {
+                if(prop.first == name) return prop.second;
+            }
+            
+            std::cerr << "The property requested was not found. Returning something.\n";
+            return Property();
         };
         
         void clear() {
             _properties.clear();
-        }
+        };
+        
+        friend inline std::ostream& operator<<(std::ostream& os, const PropertiesMap& properties) {
+            for(const auto& prop : properties._properties) {
+                std::cout << prop.first << " -> " << prop.second << std::endl;
+            }
+            return os;
+        };
 
     private:
-        std::map<std::string, Property> _properties;
+        std::vector<std::pair<std::string, Property>> _properties;
     };
 }
 

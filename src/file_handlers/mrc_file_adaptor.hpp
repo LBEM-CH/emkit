@@ -36,15 +36,17 @@ namespace em {
         
         template<typename ValueType_>
         void load_object(RealObject<ValueType_, 3>& object) {
+            
+            typedef typename RealObject<ValueType_, 3>::base_type::container_type container_type;
+            
             load_image();
             int mode = _mrc_image.data().mode();
-            int columns = (int) _mrc_image.header().get("columns");
-            int rows = (int) _mrc_image.header().get("rows");
-            int sections = (int) _mrc_image.header().get("sections");
+            int columns = std::stoi(_mrc_image.header().get("columns"));
+            int rows = std::stoi(_mrc_image.header().get("rows"));
+            int sections = std::stoi(_mrc_image.header().get("sections"));
             
-            object.properties().clear();
             if(mode == 0 || mode == 1 || mode == 2) {
-                object.container() == RealObject<ValueType_, 3>::tensor_type({columns, rows, sections}, _mrc_image.data().get<ValueType_>());
+                object.container() = container_type({columns, rows, sections}, _mrc_image.data().get<ValueType_>());
             }
             else {
                 std::cerr << "ERROR while reading MRC file:\n"
@@ -56,14 +58,15 @@ namespace em {
             //TODO implement mode 3 and 4
             // Specifically first create a complex object and fft to real object
             
-            
+            object.properties().clear();
             for(auto prop : _mrc_image.header().get_all()) {
-                object.properties().register_property(prop.first, std::to_string(prop.second));
+                object.properties().register_property(prop.first, prop.second);
             }
         };
         
         template<typename ValueType_>
         void save_object(const RealObject<ValueType_, 3>& object) {
+            
             
         };
 

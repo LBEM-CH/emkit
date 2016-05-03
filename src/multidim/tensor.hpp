@@ -55,7 +55,7 @@ namespace em {
             }
 
             Tensor(const range_type& range, const data_type& data) {
-                static_assert(range.size() == data.size(), "The size of data and the range should match");
+                assert(range.size() == data.size());
                 range_ = range;
                 container_ = data;
             };

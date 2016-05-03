@@ -34,8 +34,8 @@ namespace em
     {
     public:
         
-        typedef typename ValueType_ value_type;
-        typedef typename std::add_lvalue_reference<ValueType_> reference;
+        typedef ValueType_ value_type;
+        typedef ValueType_& reference;
 
         /**
          * Default constructor which initializes to 0 + 0i 

@@ -1,12 +1,10 @@
-#include "../src/components/iterator.hpp"
-#include "../src/components/container.hpp"
-#include "../src/components/array_container.hpp"
-#include "../src/components/tabular_conatiner.hpp"
-#include "../src/components/density.hpp"
-#include "../src/components/fourier_array.hpp"
-#include "../src/components/object.hpp"
-#include "../src/components/property.hpp"
+
+#ifndef COMPONENTS_H
+#define COMPONENTS_H
+
 #include "../src/components/properties_map.hpp"
-#include "../src/components/representation.hpp"
-#include "../src/components/real_space_representation.hpp"
-#include "../src/components/reciprocal_space_representation.hpp"
+#include "../src/components/object.hpp"
+#include "../src/components/real_object.hpp"
+#include "../src/components/complex_object.hpp"
+
+#endif
