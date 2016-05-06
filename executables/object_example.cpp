@@ -25,8 +25,6 @@ int main(int argc, char** argv) {
     
     mrc_file.load_object(image);
     
-    image.properties().register_property("rows", "300");
-    
     std::cout << image.properties() << std::endl;
     
     

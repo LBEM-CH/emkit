@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "multidim.h"
+#include "algorithms.h"
 
 using namespace std;
 
@@ -12,11 +13,12 @@ using namespace std;
  */
 int main(int argc, char** argv) {
 
+    using namespace em;
     using namespace em::multidim;
     
-    typedef Tensor<double, 2, StorageOrder::ROW_MAJOR> Image;
+    typedef Tensor<double, 2> Image;
     
-    Image image({2,3}, 0.0);
+    Image image({5,3}, 0.0);
     
     image[{1,2}] = 4.34;
     
@@ -54,6 +56,30 @@ int main(int argc, char** argv) {
     
     for(const auto& itr : image) {
         std::cout << itr.index() << " -> " << itr.value() <<std::endl;
+    }
+    
+    std::cout << "Negative Index access: \n";
+    std::cout << "Setting {-1, -1} = 3.456\n";
+    image[{-1, -1}] = 3.456;
+    
+    for(const auto& itr : image) {
+        std::cout << itr.index() << " -> " << itr.value() <<std::endl;
+    }
+    
+    std::cout << "Getting values for negative indices\n";
+    for(const auto& itr: image) {
+        std::cout << itr.index()*(-1) << " -> " << image[itr.index()*int(-1)] << std::endl;
+    }
+    
+    std::cout << "Fourier Transforming the image:\n";
+    
+    typedef Tensor<Complex<double>, 2> ComplexImage;
+    ComplexImage complex_image;
+    convert(image, complex_image);
+            
+    std::cout << "Fourier Transformed Image:\n";
+    for(const auto& itr: complex_image) {
+        std::cout << itr.index() << " -> " << itr.value() << std::endl;
     }
     
     std::cout << "\n";

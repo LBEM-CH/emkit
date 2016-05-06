@@ -116,10 +116,10 @@ namespace mrc {
             }
         };
         
-        std::vector<std::pair<std::string, std::string>> get_all() const {
-            std::vector<std::pair<std::string, std::string>> values_map;
+        std::map<std::string, std::string> get_all() const {
+            std::map<std::string, std::string> values_map;
             for(const auto& f : _values) {
-                values_map.push_back(std::make_pair(f.identifier(), f.value()));
+                values_map[f.identifier()] = f.value();
             }
             return values_map;
         }

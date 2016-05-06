@@ -71,7 +71,9 @@ namespace em {
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
                 for (int i = 0; i < rank_; ++i) {
-                    memory_id += strides[i] * idx[i];
+                    //Get the positive index
+                    int id_non_neg = (range[i] + idx[i])%range[i];
+                    memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;
             };
@@ -115,7 +117,9 @@ namespace em {
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
                 for (int i = 0; i < rank_; ++i) {
-                    memory_id += strides[i] * idx[i];
+                    //Get the positive index
+                    int id_non_neg = (range[i] + idx[i])%range[i];
+                    memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;
             };

@@ -242,6 +242,7 @@ namespace em {
                 Index updated;
                 for (int idx = 0; idx < rank_; ++idx)
                     updated[idx] = at(idx) * factor;
+                return updated;
             }
 
             /**

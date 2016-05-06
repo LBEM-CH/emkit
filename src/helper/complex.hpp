@@ -51,7 +51,7 @@ namespace em
          * @param imag
          */
         Complex(value_type real, value_type imag) 
-        : complex_(0, 0){
+        : complex_(real, imag){
             
         };
 
@@ -121,29 +121,33 @@ namespace em
         bool operator==(const Complex& rhs) const {
             return complex_ == rhs.complex_;
         };
+        
+        friend inline std::ostream& operator<<(std::ostream& os, const Complex& obj) {
+            os << " " <<obj.real() << " + " << obj.imag() << "i ";
+        }
 
         /**
          * Returns the real part of the complex
          * @return real
          */
-        reference real(){
+        value_type real() const{
             return complex_.real();
         };
         
-        const reference real() const {
-            return complex_.real();
+        void real(value_type real) {
+            complex_.real(real);
         }
 
         /**
          * Returns the imag part of the complex
          * @return 
          */
-        reference imag() {
+        value_type imag() const{
             return complex_.imag();
         };
         
-        const reference imag() const {
-            return complex_.imag();
+        void imag(value_type imag) {
+            complex_.imag(imag);
         }
 
         /**

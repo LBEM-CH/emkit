@@ -330,7 +330,7 @@ namespace em {
              */
             bool contains(const Index<rank_>& index) const {
                 for (int idx = 0; idx < rank_; ++idx)
-                    if (index[idx] >= at(idx) || index.at(idx) < 0)
+                    if (std::abs(index[idx]) >= at(idx))
                         return false;
                 return true;
             }

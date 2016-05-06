@@ -21,9 +21,7 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
-
-#include "property.hpp"
+#include <map>
 
 
 namespace em {
@@ -31,23 +29,43 @@ namespace em {
     class PropertiesMap {
     public:
 
+        typedef std::map<std::string, std::string> map_type;
+        typedef typename map_type::iterator iterator;
+        typedef typename map_type::const_iterator const_iterator;
+        
+        iterator begin() {
+            return _properties.begin();
+        }
+        
+        const_iterator begin() const {
+            return _properties.cbegin();
+        }
+        
+        iterator end() {
+            return _properties.end();
+        }
+        
+        const_iterator end() const {
+            return _properties.cend();
+        }
+        
         void register_property(std::string name, std::string value) {
-            Property property;
-            property.set_value(value);
-            register_property(name, property);
+            _properties[name] = value;
         };
-
-        void register_property(std::string name, Property property) {
-            _properties.push_back(std::make_pair(name, property));
-        };
-
-        Property get_property(std::string name) const {
-            for(const auto& prop : _properties) {
-                if(prop.first == name) return prop.second;
+        
+        bool exists(std::string name) const {
+            if(_properties.find(name) == _properties.end()) {
+                return false;
             }
-            
-            std::cerr << "The property requested was not found. Returning something.\n";
-            return Property();
+            else return true;
+        }
+        
+        std::string get_property(std::string name) const {
+            if(!exists(name)) {
+                std::cerr << "The property requested was not found. Returning something.\n";
+                return "";
+            }
+            return _properties.at(name);
         };
         
         void clear() {
@@ -62,7 +80,7 @@ namespace em {
         };
 
     private:
-        std::vector<std::pair<std::string, Property>> _properties;
+        map_type _properties;
     };
 }
 

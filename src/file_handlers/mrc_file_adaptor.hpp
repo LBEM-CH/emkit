@@ -39,7 +39,7 @@ namespace em {
             
             typedef typename RealObject<ValueType_, 3>::base_type::container_type container_type;
             
-            load_image();
+            _mrc_image.load();
             int mode = _mrc_image.data().mode();
             int columns = std::stoi(_mrc_image.header().get("columns"));
             int rows = std::stoi(_mrc_image.header().get("rows"));
@@ -67,20 +67,28 @@ namespace em {
         template<typename ValueType_>
         void save_object(const RealObject<ValueType_, 3>& object) {
             
+            //Copy the current properties
+            for(const auto& prop : object.properties()) {
+                _mrc_image.header().set(prop.first, prop.second);
+            }
+            
+            //Change to the current sizes
+            _mrc_image.header().set("columns", std::to_string(object.container().range()[0]));
+            _mrc_image.header().set("rows", std::to_string(object.container().range()[1]));
+            _mrc_image.header().set("sections", std::to_string(object.container().range()[2]));
+            _mrc_image.header().set("mode", "2");
+            
+            //Copy the data
+            _mrc_image.data().set(object.container().vectorize(), 2);
+            
+            //Save to the file
+            _mrc_image.save();
             
         };
 
     private:
         
-        void load_image() {
-            if(!_loaded) {
-                _mrc_image.load();
-                _loaded = true;
-            }
-        }
-        
         mrc::Image _mrc_image;
-        bool _loaded = false;
 
     };
 }

@@ -30,7 +30,7 @@ foreach(i ${RUNNER_SOURCES})
     
     #Link to the library created in step above
     target_link_libraries(${EXECUTABLE} LINK_PUBLIC emkit)
-    target_link_libraries(${EXECUTABLE})
+    target_link_libraries(${EXECUTABLE} /usr/local/cina/fftw/3.3.4/lib/libfftw3.a)
 
     list(APPEND EXECUTABLES_VP ${EXECUTABLE})
 endforeach(i ${RUNNER_SOURCES})
