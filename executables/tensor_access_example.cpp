@@ -73,6 +73,7 @@ int main(int argc, char** argv) {
     
     std::cout << "Fourier Transforming the image:\n";
     
+    /*
     typedef Tensor<Complex<double>, 2> ComplexImage;
     ComplexImage complex_image;
     convert(image, complex_image);
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
     for(const auto& itr: complex_image) {
         std::cout << itr.index() << " -> " << itr.value() << std::endl;
     }
-    
+    */
     std::cout << "\n";
     
 }

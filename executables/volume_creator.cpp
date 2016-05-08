@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     int nz = stoi(argv[3]);
     double radius = stoi(argv[4]);
     
-    typedef RealObject<double, 3> Volume;
+    typedef Object<double, 3> Volume;
     typedef Tensor<double, 3> Array3D;
     
     Array3D arr({nx, ny, nz}, 0.0);

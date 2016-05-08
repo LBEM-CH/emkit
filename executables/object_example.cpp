@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
         exit(1);
     }
     
-    typedef RealObject<double, 3> Volume;
+    typedef Object<double, 3> Volume;
     typedef Tensor<double, 3> Array3D;
 
     Volume image;

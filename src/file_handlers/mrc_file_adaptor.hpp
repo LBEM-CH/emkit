@@ -23,7 +23,7 @@
 #include <fstream>
 
 #include "mrcfile/image.hpp"
-#include "../components/real_object.hpp"
+#include "../components/object.hpp"
 
 namespace em {
 
@@ -35,9 +35,9 @@ namespace em {
         };
         
         template<typename ValueType_>
-        void load_object(RealObject<ValueType_, 3>& object) {
+        void load_object(Object<ValueType_, 3>& object) {
             
-            typedef typename RealObject<ValueType_, 3>::base_type::container_type container_type;
+            typedef typename Object<ValueType_, 3>::container_type container_type;
             
             _mrc_image.load();
             int mode = _mrc_image.data().mode();
@@ -65,7 +65,7 @@ namespace em {
         };
         
         template<typename ValueType_>
-        void save_object(const RealObject<ValueType_, 3>& object) {
+        void save_object(const Object<ValueType_, 3>& object) {
             
             //Copy the current properties
             for(const auto& prop : object.properties()) {
