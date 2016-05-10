@@ -24,19 +24,47 @@
 
 namespace em {
     
-    //Real to Complex conversion
+    /**
+     * ROW MAJOR to COLUMN MAJOR converter
+     * @param input
+     * @param output
+     */
+    template<typename TensorInputType_, typename TensorOutputType_>
+    void convert(const TensorInputType_& input,
+                       TensorOutputType_& output) {
+        
+        assert(input.range() == output.range());
+        
+        for(const auto& itr : input) {
+            output[itr.index()] = itr.value();
+        }
+        
+    }
     
+    
+    /**
+     * REAL to COMPLEX FFT conversion
+     * @param logical_range
+     * @param real
+     * @param complex
+     */
     template<typename ValueType_, size_t rank_>
-    void convert(const RealObject<ValueType_, rank_>& real, ComplexObject<ValueType_, rank_>& complex) {
-        std::cout << "Conversion: REAL -> FOURIER\n";
+    void convert(const multidim::Range<rank_>& logical_range,
+                 const multidim::Tensor<ValueType_         , rank_, multidim::StorageOrder::COLUMN_MAJOR>& real, 
+                       multidim::Tensor<Complex<ValueType_>, rank_, multidim::StorageOrder::COLUMN_MAJOR>& complex) {
+        
+        //Check the provided size
+        assert(logical_range.size() <= real.range().size());
         
         //Do the FFT
         std::vector<int> sizes;
-        for(int i=0; i< rank_; ++i) sizes.push_back((int)real.range()[i]);
-        auto output = FFTEnvironment::Instance().get_transformer()->forward_fourier(sizes, real.container().vectorize());
+        for(int i=0; i< rank_; ++i) sizes.push_back((int)logical_range[i]);
+        auto output = FFTEnvironment::Instance().get_transformer()->forward_fourier(sizes, real.vectorize());
         
         //Create the complex valued tensor
-        complex = ComplexObject<ValueType_, rank_>(real.range());
+        multidim::Range<rank_> complex_container_range = logical_range;
+        complex_container_range[0] = complex_container_range[0] / 2 + 1;
+        complex = multidim::Tensor<Complex<ValueType_>, rank_, multidim::StorageOrder::COLUMN_MAJOR>(complex_container_range, Complex<ValueType_>());
         
         for(int id=0; id<complex.range().size(); id++)
         {
@@ -44,9 +72,19 @@ namespace em {
         };
     }
     
+    /**
+     * COMPLEX TO REAL InverseFFT conversion
+     * @param logical_range
+     * @param complex
+     * @param real
+     */
     template<typename ValueType_, size_t rank_>
-    void convert(const ComplexObject<ValueType_, rank_>& complex, RealObject<ValueType_, rank_>& real) {
-        std::cout << "Conversion: FOURIER -> REAL\n";
+    void convert(const multidim::Range<rank_>& logical_range,
+                 const multidim::Tensor<Complex<ValueType_>, rank_, multidim::StorageOrder::COLUMN_MAJOR>& complex,
+                       multidim::Tensor<ValueType_         , rank_, multidim::StorageOrder::COLUMN_MAJOR>& real) {
+        
+        //Check the provided size
+        assert(logical_range.size() <= complex.range().size()*2);
         
         std::vector<double> input;
         for(int id=0; id<complex.range().size(); id++)
@@ -57,12 +95,11 @@ namespace em {
         
         //Do the FFT
         std::vector<int> sizes;
-        for(int i=0; i< rank_; ++i) sizes.push_back((int)complex.logical_range()[i]);
+        for(int i=0; i< rank_; ++i) sizes.push_back((int) logical_range[i]);
         auto output = FFTEnvironment::Instance().get_transformer()->inverse_fourier(sizes, input);
         
         //Create the complex valued tensor
-        auto tensor = multidim::Tensor<ValueType_,rank_,multidim::StorageOrder::COLUMN_MAJOR>(complex.logical_range(), output);
-        real = RealObject<ValueType_, rank_>(tensor);
+        real = multidim::Tensor<ValueType_,rank_,multidim::StorageOrder::COLUMN_MAJOR>(logical_range, output);
     }
     
 }

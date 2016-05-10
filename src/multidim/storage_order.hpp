@@ -19,7 +19,7 @@ namespace em {
         
         
         template<int rank_, StorageOrder format_>
-        class StorageOrderArranger {
+        class MemoryArranger {
         public:
 
             static const int kRank = rank_;
@@ -30,11 +30,11 @@ namespace em {
 
         public:
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range) {
+            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& center) {
                 return IndexType(0);
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range) {
+            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& center) {
                 return 0;
             }
 
@@ -46,7 +46,7 @@ namespace em {
         };
 
         template<int rank_>
-        class StorageOrderArranger<rank_, StorageOrder::COLUMN_MAJOR> {
+        class MemoryArranger<rank_, StorageOrder::COLUMN_MAJOR> {
         public:
             static const int kRank = rank_;
             static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
@@ -54,7 +54,7 @@ namespace em {
             using RangeType = Range<rank_>;
             using MemoryIdType = typename RangeType::value_type;
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range) {
+            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& center) {
                 assert(range.size() > id);
                 IndexType idx;
                 MemoryIdType temp_id = id;
@@ -63,16 +63,17 @@ namespace em {
                     idx[i] = temp_id/strides[i];
                     temp_id -= idx[i] * strides[i];
                 }
-                return idx;
+                return idx - center;
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range) {
+            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& center) {
                 assert(range.contains(idx));
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
+                IndexType corrected_index = idx + center;
                 for (int i = 0; i < rank_; ++i) {
                     //Get the positive index
-                    int id_non_neg = (range[i] + idx[i])%range[i];
+                    int id_non_neg = (range[i] + corrected_index[i])%range[i];
                     memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;
@@ -92,7 +93,7 @@ namespace em {
         };
 
         template<int rank_>
-        class StorageOrderArranger<rank_, StorageOrder::ROW_MAJOR> {
+        class MemoryArranger<rank_, StorageOrder::ROW_MAJOR> {
         public:
             static const int kRank = rank_;
             static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
@@ -100,7 +101,8 @@ namespace em {
             using RangeType = Range<rank_>;
             using MemoryIdType = typename RangeType::value_type;
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range) {
+            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& center) {
+                assert(range.contains(center));
                 assert(range.size() > id);
                 IndexType idx;
                 MemoryIdType temp_id = id;
@@ -109,16 +111,18 @@ namespace em {
                     idx[i] = temp_id/strides[i];
                     temp_id -= idx[i] * strides[i];
                 }
-                return idx;
+                return (idx - center);
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range) {
+            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& center) {
+                assert(range.contains(center));
                 assert(range.contains(idx));
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
+                IndexType corrected_index = idx + center;
                 for (int i = 0; i < rank_; ++i) {
                     //Get the positive index
-                    int id_non_neg = (range[i] + idx[i])%range[i];
+                    int id_non_neg = (range[i] + corrected_index[i])%range[i];
                     memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;

@@ -11,29 +11,29 @@
 #include <functional>
 
 #include "storage_order.hpp"
+#include "index_value_pair.hpp"
 
 
 namespace em {
     namespace multidim {
 
-        template<typename ValueType_, size_t rank_, StorageOrder order_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         class TensorIterator;
         
         template<typename ValueType_, size_t rank_ = 1, StorageOrder order_ = StorageOrder::COLUMN_MAJOR>
         class Tensor {
-        protected:
+        public:
             using index_type = Index<rank_>;
             using range_type = Range<rank_>;
-            using order_arranger = StorageOrderArranger<rank_, order_>;
+            using arranger_type = MemoryArranger<rank_, order_>;
             using data_type = std::vector<ValueType_>;
             using self_ = Tensor<ValueType_, rank_, order_>;
 
-        public:
             static const int rank = rank_;
             static const StorageOrder storage_order = order_;
             using value_type = ValueType_;
-            using iterator = TensorIterator<ValueType_, rank_, order_>;
-            using const_iterator = const iterator;
+            using iterator = TensorIterator<ValueType_, rank_, order_, false>;
+            using const_iterator = TensorIterator<ValueType_, rank_, order_, true>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             using reverse_iterator = std::reverse_iterator<iterator>;
             using reference = ValueType_&;
@@ -47,28 +47,46 @@ namespace em {
              */
 
             Tensor()
-            : range_(), container_() {
+            : range_(), center_(0), container_() {
             };
             
-            Tensor(const range_type& range, const value_type default_value)
-            : range_(range), container_(data_type(range.size(), default_value)) {
+            Tensor(const range_type& range, const value_type& default_value)
+            : range_(range), center_(0), container_(data_type(range.size(), default_value)) {
+            }
+            
+            Tensor(const range_type& range, const index_type& center, const value_type& default_value)
+            : range_(range), center_(center), container_(data_type(range.size(), default_value)) {
+                assert(range.contains(center));
             }
 
-            Tensor(const range_type& range, const data_type& data) {
+            Tensor(const range_type& range, const data_type& data) 
+            : range_(range), center_(0), container_(data) {
                 assert(range.size() == data.size());
-                range_ = range;
-                container_ = data;
             };
-
-            Tensor(const range_type& range, const pointer& data) {
-                range_ = range;
-                container_ = data_type(data, data + range.size());
+            
+            Tensor(const range_type& range, const index_type& center, const data_type& data) 
+            : range_(range), center_(center), container_(data) {
+                assert(range.size() == data.size());
+                assert(range.contains(center));
             };
-
+            
             Tensor(const Tensor& other) {
-                range_ = other.range_;
-                container_ = other.container_;
+                reset(other);
             };
+
+            Tensor(Tensor&& other) {
+                reset(other);
+            };
+            
+            Tensor& operator=(const Tensor& right) {
+                if (this != &right) reset(right);
+                return *this;
+            }
+ 
+            Tensor& operator=(Tensor&& right) {
+                if (this != &right) reset(right);
+                return *this;
+            }
             
 
             /**
@@ -76,7 +94,7 @@ namespace em {
              */
             
             const_reference operator[](const index_type& idx) const {
-                size_type memory_id = order_arranger::map(idx, range_);
+                size_type memory_id = arranger_type::map(idx, range_, center_);
                 return container_[memory_id];
             }
 
@@ -85,12 +103,12 @@ namespace em {
             }
 
             const_reference at(const index_type& idx) const {
-                size_type memory_id = order_arranger::map(idx, range_);
+                size_type memory_id = arranger_type::map(idx, range_, center_);
                 return container_.at(memory_id);
             }
             
             reference at(const index_type& idx) {
-                size_type memory_id = order_arranger::map(idx, range_);
+                size_type memory_id = arranger_type::map(idx, range_, center_);
                 return container_.at(memory_id);
             }
             
@@ -156,11 +174,11 @@ namespace em {
             }
 
             const_iterator begin() const {
-                return iterator(this, 0);
+                return cbegin();
             }
             
             const_iterator cbegin() const {
-                return iterator(this, 0);
+                return const_iterator(this, 0);
             }
 
             iterator end() {
@@ -168,11 +186,11 @@ namespace em {
             }
 
             const_iterator end() const {
-                return iterator(this, size());
+                return cend();
             }
             
             const_iterator cend() const {
-                return  iterator(this, size());
+                return const_iterator(this, size());
             }
             
             
@@ -183,13 +201,17 @@ namespace em {
             range_type range() const {
                 return range_;
             }
+            
+            index_type center() const {
+                return center_;
+            }
 
             size_type size() const {
                 return range_.size();
             }
 
             index_type stride() const {
-                return order_arranger::get_stride(range_);
+                return arranger_type::get_stride(range_);
             }
 
             bool empty() const {
@@ -200,6 +222,12 @@ namespace em {
              * Modifiers
              */
             
+            void recenter(const index_type& new_center) {
+                Tensor<value_type, rank_, order_> temp(range(), new_center, value_type());
+                convert(*this, temp);
+                this->reset(temp);
+            }
+            
             void reshape(const range_type& new_range) {
                 assert(new_range.size() ==  range_.size());
                 range_ = new_range;
@@ -208,6 +236,24 @@ namespace em {
             void resize(const range_type& range) {
                 range_ = range;
                 container_.resize(range.size());
+            }
+            
+            template<StorageOrder order>
+            void reset(const Tensor<value_type, rank_, order>& other) {
+                range_ = other.range_;
+                center_ = other.center_;
+                if(order == order_) container_ = other.container_;
+                else {
+                    for(const auto& data : other) {
+                        at(data.index()) = data.value();
+                    }
+                }
+            }
+            
+            void reset(Tensor&& other) {
+                range_ = std::move(other.range_);
+                center_ = std::move(other.center_);
+                container_ = std::move(other.container_);
             }
             
             void clear() {
@@ -222,6 +268,16 @@ namespace em {
                 Tensor temp = *this;
                 this = other;
                 other = temp;
+            }
+            
+            /**
+             * Output stream operator
+             */
+            friend inline std::ostream& operator<<(std::ostream& os, const self_& obj) {
+                for(const auto& itr : obj) {
+                    os << itr.index() << " -> " << itr.value() <<std::endl;
+                }
+                return os;
             }
             
             /**
@@ -323,6 +379,7 @@ namespace em {
         private:
 
             range_type range_;
+            index_type center_;
             data_type container_;
 
         };

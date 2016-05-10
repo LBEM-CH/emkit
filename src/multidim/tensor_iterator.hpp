@@ -13,22 +13,22 @@
 namespace em {
     namespace multidim {
 
-        template<typename ValueType_, size_t rank_, StorageOrder order_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         class TensorIterator {
         protected:
-            typedef TensorIterator<ValueType_, rank_, order_> Self_;
-            typedef Tensor<ValueType_, rank_, order_> TensorType_;
+            typedef TensorIterator<ValueType_, rank_, order_, is_const_iterator_> Self_;
+            typedef typename std::conditional<is_const_iterator_, const Tensor<ValueType_, rank_, order_>, Tensor<ValueType_, rank_, order_>>::type TensorType_;
             typedef Index<rank_> index_type;
             typedef Range<rank_> range_type;
             typedef typename index_type::size_type size_type;
-            typedef StorageOrderArranger<rank_, order_> order_arranger_type;
+            typedef MemoryArranger<rank_, order_> order_arranger_type;
 
         public:
             static const size_t rank = rank_;
             static const StorageOrder storage_order = order_;
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
-            using value_type = IndexValuePair<ValueType_, rank_>;
+            using value_type = typename std::conditional<is_const_iterator_, IndexValuePair<const ValueType_, rank_>, IndexValuePair<ValueType_, rank_>>::type;
             using pointer = value_type*;
             using reference = value_type&;
 
@@ -134,7 +134,7 @@ namespace em {
         protected:
             
             void rebook_pair(size_type index) {
-                index_type idx = order_arranger_type::map(index, tensor_container_->range());
+                index_type idx = order_arranger_type::map(index, tensor_container_->range(), tensor_container_->center());
                 pair_ = value_type(idx, &tensor_container_->at(index));
             }
             
@@ -146,47 +146,47 @@ namespace em {
 
         // Forward iterator requirements
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator==(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator==(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return (__lhs.base() == __rhs.base() && __lhs.index() == __rhs.index());
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator!=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator!=(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return (__lhs.base() != __rhs.base() || __lhs.index() != __rhs.index());
         }
 
         // Random access iterator requirements
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator<(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator<(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return __lhs.index() < __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator>(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator>(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return __lhs.index() > __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator<=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator<=(const TensorIterator<ValueType_, rank_, order_,is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return __lhs.index() <= __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_>
+        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
-        operator>=(const TensorIterator<ValueType_, rank_, order_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_>&& __rhs) {
+        operator>=(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
             return __lhs.index() >= __rhs.index();
         }
 

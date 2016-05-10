@@ -3,10 +3,9 @@
 #define EM_REAL_OBJECT_HPP
 
 #include "object.hpp"
+#include "complex_object.hpp"
 
-namespace em {    
-    
-    template<typename DensityValueType_, size_t rank_> class ComplexObject;
+namespace em {
     
     template<typename DensityValueType_, size_t rank_>
     class RealObject {
@@ -33,7 +32,7 @@ namespace em {
         };
         
         RealObject(const ComplexObject<DensityValueType_, rank_>& complex) {
-            convert(complex, *this);
+            convert(complex.logical_range(), complex.container(), container_);
         };
         
         RealObject(const std::string file_name) {

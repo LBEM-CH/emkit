@@ -4,6 +4,7 @@
 
 #include "../helper/complex.hpp"
 #include "object.hpp"
+#include "real_object.hpp"
 
 namespace em {
     
@@ -53,7 +54,7 @@ namespace em {
         };
 
         ComplexObject(const RealObject<APHValueType_, rank_>& real) {
-            convert(real, *this);
+            convert(real.range(), real.container(), container_);
         };
 
         ComplexObject(const std::string file_name) {
