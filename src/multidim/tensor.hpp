@@ -70,6 +70,10 @@ namespace em {
                 assert(range.contains(center));
             };
             
+            Tensor(const range_type& range, const pointer& data) 
+            : range_(range_), center_(0), container_(data_type(data, data + range.size())){
+            }
+            
             Tensor(const Tensor& other) {
                 reset(other);
             };
@@ -271,11 +275,11 @@ namespace em {
             }
             
             /**
-             * Output stream operator
+             * Output/Print
              */
             friend inline std::ostream& operator<<(std::ostream& os, const self_& obj) {
                 for(const auto& itr : obj) {
-                    os << itr.index() << " -> " << itr.value() <<std::endl;
+                    os << itr.index() << " -> " << itr.value() << "\n";
                 }
                 return os;
             }
@@ -340,40 +344,31 @@ namespace em {
              * Slicing
              */
 
-            const Tensor<value_type, rank_ - 1 > & slice(typename index_type::value_type slice_number) const {
+            Tensor<value_type, rank_ - 1, order_> slice(typename index_type::value_type slice_number) const {
                 static_assert(rank_ > 1, "The rank should be more than 1 for slicing");
                 assert(slice_number < range_[rank_ - 1]);
                 Range < rank_ - 1 > slice_range;
                 for (int i = 0; i < rank_ - 1; ++i) slice_range[i] = range_[i];
-                return Tensor<value_type, rank_ - 1 > (slice_range, container_.data() + slice_number * stride()[rank_ - 1]);
+                size_t start = slice_number * slice_range.size();
+                size_t extent = (slice_number+1) * slice_range.size();
+                data_type slice_vector = data_type(container_.data() + start, container_.data() + extent);
+                Tensor<value_type, rank_ - 1, order_> sliced(slice_range, slice_vector); 
+                return sliced;
             }
 
-            Tensor<value_type, rank_ - 1 > & slice(typename index_type::value_type slice_number) {
-                return const_cast<Tensor<value_type, rank_ - 1 > &> (static_cast<const Tensor<value_type, rank_> &> (*this).slice(slice_number));
-            }
 
             /**
              * Sectioning
              */
 
-            self_ section(const index_type& begin_index, const range_type& section_range) {
-                self_ cut(section_range);
-                assert(range_.contains(section_range + begin_index));
-                index_type strides = stride();
-                index_type new_id(0);
-                index_type old_id(begin_index);
-                for (int r = 0; r < rank_; ++r) {
-                    for (size_type id = 0; id < section_range[r]; ++id) {
-                        new_id[r] += id;
-                        old_id[r] += id;
-                        cut[new_id] = operator[](new_id);
-                    }
+            self_ section(const index_type& begin_index, const range_type& section_range) const {
+                assert(range_.contains(section_range + begin_index - index_type(1)));
+                self_ cut(section_range, value_type());
+                for(auto& val : cut) {
+                    val.value() = at(val.index()+begin_index);
                 }
-
                 return cut;
             }
-
-
 
 
         private:

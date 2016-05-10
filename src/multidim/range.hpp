@@ -334,6 +334,19 @@ namespace em {
                         return false;
                 return true;
             }
+            
+            /**
+             * @brief       Checks if the range provided is contained in the range
+             * @ingroup     member_functions
+             * @param       range
+             * @return 
+             */
+            bool contains(const Range& index) const {
+                for (int idx = 0; idx < rank_; ++idx)
+                    if (std::abs(index[idx]) >= at(idx))
+                        return false;
+                return true;
+            }
 
             /**@}*/
             

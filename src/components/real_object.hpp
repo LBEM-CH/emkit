@@ -3,9 +3,10 @@
 #define EM_REAL_OBJECT_HPP
 
 #include "object.hpp"
-#include "complex_object.hpp"
 
 namespace em {
+    
+    template<typename DensityValueType_, size_t rank_> class ComplexObject;
     
     template<typename DensityValueType_, size_t rank_>
     class RealObject {

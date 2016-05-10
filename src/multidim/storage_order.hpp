@@ -13,12 +13,11 @@ namespace em {
     namespace multidim {
 
         enum class StorageOrder {
-            COLUMN_MAJOR,   //FORTRAN/MATLAB LIKE 
-            ROW_MAJOR       //C++ LIKE
+            COLUMN_MAJOR, //FORTRAN/MATLAB LIKE 
+            ROW_MAJOR //C++ LIKE
         };
-        
-        
-        template<int rank_, StorageOrder format_>
+
+        template<size_t rank_, StorageOrder format_>
         class MemoryArranger {
         public:
 
@@ -45,7 +44,7 @@ namespace em {
 
         };
 
-        template<int rank_>
+        template<size_t rank_>
         class MemoryArranger<rank_, StorageOrder::COLUMN_MAJOR> {
         public:
             static const int kRank = rank_;
@@ -59,8 +58,8 @@ namespace em {
                 IndexType idx;
                 MemoryIdType temp_id = id;
                 IndexType strides = get_stride(range);
-                for(int i=rank_-1; i>=0; --i){
-                    idx[i] = temp_id/strides[i];
+                for (int i = rank_ - 1; i >= 0; --i) {
+                    idx[i] = temp_id / strides[i];
                     temp_id -= idx[i] * strides[i];
                 }
                 return idx - center;
@@ -71,28 +70,28 @@ namespace em {
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
                 IndexType corrected_index = idx + center;
-                for (int i = 0; i < rank_; ++i) {
+                for (size_t i = 0; i < rank_; ++i) {
                     //Get the positive index
-                    int id_non_neg = (range[i] + corrected_index[i])%range[i];
+                    size_t id_non_neg = (range[i] + corrected_index[i]) % range[i];
                     memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;
             };
 
             static IndexType get_stride(const RangeType& range) {
-                IndexType strides;
-                for (int idx = rank_ - 1; idx >= 0; --idx) {
-                    strides[idx] = 1;
-                    for (int idx_inner = idx - 1; idx_inner >= 0; --idx_inner) {
-                        strides[idx] *= range[idx_inner];
+                IndexType strides(1);
+                if (range.rank > 1) {
+                    for (int idx = rank_ - 1; idx >= 0; --idx) {
+                        for (int idx_inner = idx - 1; idx_inner >= 0; --idx_inner) {
+                            strides[idx] *= range[idx_inner];
+                        }
                     }
                 }
-
                 return strides;
             }
         };
 
-        template<int rank_>
+        template<size_t rank_>
         class MemoryArranger<rank_, StorageOrder::ROW_MAJOR> {
         public:
             static const int kRank = rank_;
@@ -107,8 +106,8 @@ namespace em {
                 IndexType idx;
                 MemoryIdType temp_id = id;
                 IndexType strides = get_stride(range);
-                for(int i=0; i<rank_; ++i){
-                    idx[i] = temp_id/strides[i];
+                for (size_t i = 0; i < rank_; ++i) {
+                    idx[i] = temp_id / strides[i];
                     temp_id -= idx[i] * strides[i];
                 }
                 return (idx - center);
@@ -120,9 +119,9 @@ namespace em {
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
                 IndexType corrected_index = idx + center;
-                for (int i = 0; i < rank_; ++i) {
+                for (size_t i = 0; i < rank_; ++i) {
                     //Get the positive index
-                    int id_non_neg = (range[i] + corrected_index[i])%range[i];
+                    int id_non_neg = (range[i] + corrected_index[i]) % range[i];
                     memory_id += strides[i] * id_non_neg;
                 }
                 return memory_id;
@@ -131,9 +130,9 @@ namespace em {
             static IndexType get_stride(const RangeType& range) {
                 IndexType strides;
 
-                for (int idx = 0; idx < rank_; ++idx) {
+                for (size_t idx = 0; idx < rank_; ++idx) {
                     strides[idx] = 1;
-                    for (int idx_inner = idx + 1; idx_inner < rank_; ++idx_inner) {
+                    for (size_t idx_inner = idx + 1; idx_inner < rank_; ++idx_inner) {
                         strides[idx] *= range[idx_inner];
                     }
                 }

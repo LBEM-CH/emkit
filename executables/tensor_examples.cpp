@@ -71,6 +71,26 @@ int main(int argc, char** argv) {
     }
     cout << "\n";
     
+    
+    /*************************************
+     * Slicing example
+     *************************************/
+    for(size_t i=0; i< image.range()[image.rank - 1]; ++i){
+        cout << "Slice: " << i << "\n" << image.slice(i);
+    }
+    cout << "\n";
+    
+    
+    /*************************************
+     * Sectioning example
+     *************************************/
+    Index<2> start = {nx/2, ny/2};
+    Range<2> extent = image.range() - start;
+    cout << "Section starting from: " << start << " of length: " << extent << "\n";
+    cout << image.section(start, extent);
+    cout << "\n";
+    
+    
     /*************************************
      * A different centered image
      *************************************/
@@ -87,6 +107,7 @@ int main(int argc, char** argv) {
         }
     }
     cout << "\n";
+    
     
     /*************************************
      * Converting the storage order
