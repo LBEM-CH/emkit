@@ -144,7 +144,7 @@ namespace em {
                 return tensor_container_;
             }
 
-            size_type index() {
+            size_type index() const {
                 return index_;
             }
 
@@ -161,50 +161,48 @@ namespace em {
 
         };
 
-        // Forward iterator requirements
-
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
-        inline bool
-        operator==(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
-            return (__lhs.base() == __rhs.base() && __lhs.index() == __rhs.index());
-        }
-
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
-        inline bool
-        operator!=(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
-            return (__lhs.base() != __rhs.base() || __lhs.index() != __rhs.index());
-        }
-
         // Random access iterator requirements
 
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
         operator<(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
             return __lhs.index() < __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
         operator>(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
             return __lhs.index() > __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
         operator<=(const TensorIterator<ValueType_, rank_, order_,is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
             return __lhs.index() <= __rhs.index();
         }
 
-        template<typename ValueType_, int rank_, StorageOrder order_, bool is_const_iterator_>
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         inline bool
         operator>=(const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __lhs,
-                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>&& __rhs) {
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
             return __lhs.index() >= __rhs.index();
+        }
+        
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
+        inline typename TensorIterator<ValueType_, rank_, order_, is_const_iterator_>::difference_type
+        operator-(const TensorIterator<ValueType_, rank_, order_,is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
+            return __lhs.index() - __rhs.index();
+        }
+
+        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
+        inline typename TensorIterator<ValueType_, rank_, order_, is_const_iterator_>::difference_type
+        operator+(const TensorIterator<ValueType_, rank_, order_,is_const_iterator_>& __lhs,
+                const TensorIterator<ValueType_, rank_, order_, is_const_iterator_>& __rhs) {
+            return __lhs.index() + __rhs.index();
         }
 
     }

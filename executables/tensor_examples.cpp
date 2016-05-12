@@ -138,6 +138,10 @@ int main(int argc, char** argv) {
      *************************************/
     std::cout << "Min value in array: " << min_value(image.begin(), image.end()) << " and occurs at: " << min_index(image.begin(), image.end()) << "\n";
     std::cout << "Max value in array: " << em::max(image.begin(), image.end()).value() << " and occurs at: " << em::max(image.begin(), image.end()).index() << "\n";
+    std::cout << "Sum of all the elements: " << sum(image.begin(), image.end()) << "\n";
+    std::cout << "Squared sum of all the elements: " << squared_sum(image.begin(), image.end()) << "\n";
+    std::cout << "Mean of all the elements: " << mean(image.begin(), image.end()) << "\n";
+    std::cout << "Standard deviation of the elements: " << standard_deviation(image.begin(), image.end()) << "\n";
     
     cout << "\n\n";
     

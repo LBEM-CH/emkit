@@ -307,7 +307,7 @@ namespace em {
                 return os;
             }
 
-            double distance(const Index& other) {
+            double distance(const Index& other) const {
                 Index<3> diff = *this-other;
                 double dist = 0;
                 for(int i=0; i<3; ++i) dist += diff[i]*diff[i];
