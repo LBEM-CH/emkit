@@ -16,15 +16,20 @@
  * 
  */
 
-#ifndef EM_ALGORITHMS_H
-#define EM_ALGORITHMS_H
+#ifndef OBJECTS_H
+#define OBJECTS_H
 
-#include "../src/algorithm/convert.hpp"
-#include "../src/algorithm/fourier_transform.hpp"
+#include "../src/objects/object.hpp"
+#include "../src/objects/real_object.hpp"
+#include "../src/objects/complex_object.hpp"
+#include "../src/objects/mrc_object.hpp"
+#include "../src/objects/hkl_object.hpp"
 
 namespace em {
     
-    using namespace algorithm;
+    using namespace object;
+    
+    
 }
 
 #endif

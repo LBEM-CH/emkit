@@ -19,9 +19,7 @@ set(PROJECT_SOURCES ${CPP_SOURCES})
 set(PROJECT_HEADERS ${HPP_HEADERS})
 
 include_directories("/usr/local/cina/fftw/3.3.4/include")
-include_directories("${CMAKE_SOURCE_DIR}/lib")
-
-message("${CMAKE_SOURCE_DIR}/lib/mrcfile")
+include_directories("${CMAKE_SOURCE_DIR}/external")
 
 #==============================#
 # Add library		           #

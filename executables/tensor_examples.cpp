@@ -3,12 +3,12 @@
 #include <string>
 #include <algorithm>
 
-#include "multidim.h"
+#include "elements.h"
 #include "algorithms.h"
 
 using namespace std;
 using namespace em;
-using namespace em::multidim;
+using namespace em::element;
 typedef Tensor<double, 2, StorageOrder::ROW_MAJOR> ImageRM;
 typedef Tensor<double, 2, StorageOrder::COLUMN_MAJOR> ImageCM;
 typedef Tensor<Complex<double>, 2, StorageOrder::ROW_MAJOR> ComplexImageRM;
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
      * ACESSING THE MEMORY LOCATIONS
      *************************************/
     for(auto& itr: image) {
-        itr.value() = ImageRM::arranger_type::map(itr.index(), image.range(), image.center());
+        itr.value() = ImageRM::arranger_type::map(itr.index(), image.range(), image.origin());
     }
     cout << "Setting the indices to their memory locations\n" << image;
     
@@ -92,13 +92,13 @@ int main(int argc, char** argv) {
     
     
     /*************************************
-     * A different centered image
+     * A different origin image
      *************************************/
-    ImageRM image_centered({nx,ny}, {nx/2,ny/2}, 0.0);
-    for(auto& itr: image_centered) {
-        itr.value() = ImageRM::arranger_type::map(itr.index(), image_centered.range(), image_centered.center());
+    ImageRM image_centered_origin({nx,ny}, {nx/2,ny/2}, 0.0);
+    for(auto& itr: image_centered_origin) {
+        itr.value() = ImageRM::arranger_type::map(itr.index(), image_centered_origin.range(), image_centered_origin.origin());
     }
-    cout << "Center of image as "<< Index<2>({nx/2, ny/2}) << "\n" << image_centered;
+    cout << "Origin of image as "<< Index<2>({nx/2, ny/2}) << "\n" << image_centered_origin;
     
     std::cout << "Printing the whole range:\n";
     for(int i=-1*image.range()[0] + 1; i< image.range()[0]; ++i) {
@@ -122,13 +122,13 @@ int main(int argc, char** argv) {
      * Fourier transform of the image
      *************************************/
     ComplexImageCM complex_image;
-    convert(image_cm.range(), image_cm, complex_image);
+    fourier_transform(image_cm.range(), image_cm, complex_image);
     cout << "Fourier Transforming the image:\n" << complex_image << endl;
     
-    complex_image.recenter({0, ny/2});
-    cout << "Recentered Fourier transformed image:\n" << complex_image << endl;
+    complex_image.transform_origin({0, ny/2});
+    cout << "Transformed origin Fourier image:\n" << complex_image << endl;
     
-    ComplexImageRM complex_image_rm(complex_image.range(), complex_image.center(), ComplexImageCM::value_type(0,0));
+    ComplexImageRM complex_image_rm(complex_image.range(), complex_image.origin(), ComplexImageCM::value_type(0,0));
     convert(complex_image, complex_image_rm);
     cout << "Reordered Fourier transformed image:\n" << complex_image_rm << endl; 
     

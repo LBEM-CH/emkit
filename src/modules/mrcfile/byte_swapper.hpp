@@ -16,15 +16,27 @@
  * 
  */
 
-#ifndef EM_ALGORITHMS_H
-#define EM_ALGORITHMS_H
-
-#include "../src/algorithm/convert.hpp"
-#include "../src/algorithm/fourier_transform.hpp"
+#ifndef BYTE_SWAPPER_HPP
+#define BYTE_SWAPPER_HPP
 
 namespace em {
-    
-    using namespace algorithm;
+
+    namespace mrc {
+
+        class ByteSwapper {
+        public:
+
+            static void byte_swap(void *data, int size) {
+                if (size == 1) return;
+                for (int i = 0; i < size / 2; i++) {
+                    char temp = ((char*) data)[i];
+                    ((char*) data)[i] = ((char*) data)[size - i - 1];
+                    ((char*) data)[size - i - 1] = temp;
+                }
+            };
+        };
+    }
 }
 
-#endif
+#endif /* BYTE_SWAPPER_HPP */
+
