@@ -3,6 +3,7 @@
 #include <iostream>
 #include "objects.h"
 #include "elements.h"
+#include "algorithms.h"
 
 using namespace std;
 using namespace em;
@@ -19,6 +20,8 @@ int main(int argc, char** argv) {
 
     MRCObject<double> mrc_file(argv[1]);
     mrc_file.load();
+    
+    std::cout << "Read the following header fields:\n";
     std::cout << mrc_file.properties() << std::endl;
     
     return 0;

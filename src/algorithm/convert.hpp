@@ -19,12 +19,8 @@
 #ifndef EM_TENSOR_CONVERT_HPP
 #define EM_TENSOR_CONVERT_HPP
 
-#include "../modules/fft/fft_environment.hpp"
-#include "../elements/complex.hpp"
-
-#include "../elements/tensor.hpp"
-#include "../elements/range.hpp"
-#include "../elements/tensor_storage_order.hpp"
+#include <iostream>
+#include <cassert>
 
 namespace em {
     

@@ -12,6 +12,9 @@ namespace em {
             
         public:
             
+            typedef ValueType_ value_type;
+            typedef Index<rank_> index_type;
+            
             IndexValuePair() {};
             
             IndexValuePair(Index<rank_>& idx, ValueType_* val)

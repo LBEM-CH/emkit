@@ -133,6 +133,12 @@ int main(int argc, char** argv) {
     cout << "Reordered Fourier transformed image:\n" << complex_image_rm << endl; 
     
     
+    /*************************************
+     * Statistics
+     *************************************/
+    std::cout << "Min value in array: " << min_value(image.begin(), image.end()) << " and occurs at: " << min_index(image.begin(), image.end()) << "\n";
+    std::cout << "Max value in array: " << em::max(image.begin(), image.end()).value() << " and occurs at: " << em::max(image.begin(), image.end()).index() << "\n";
+    
     cout << "\n\n";
     
 }
