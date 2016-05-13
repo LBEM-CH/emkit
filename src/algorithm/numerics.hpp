@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef STATISTICS_HPP
-#define STATISTICS_HPP
+#ifndef NUMERICS_HPP
+#define NUMERICS_HPP
 
 #include <iterator>
 
@@ -31,7 +31,7 @@ namespace em {
             using pair_type = typename std::iterator_traits<TensorIterator_>::value_type;
             return *std::max_element(begin, end,
                     [] (const pair_type & p1, const pair_type & p2) {
-                        return p1.value() < p2.value();
+                        return element::value(p1) < element::value(p2);
                     });
         }
         
@@ -41,32 +41,32 @@ namespace em {
             using pair_type = typename TensorIterator_::value_type;
             return *std::max_element(begin, end,
                     [] (const pair_type & p1, const pair_type & p2) {
-                        return p1.value() > p2.value();
+                        return element::value(p1) > element::value(p2);
                     });
         }
         
         template<typename TensorIterator_>
         typename std::iterator_traits<TensorIterator_>::value_type::value_type
         max_value(TensorIterator_ begin, TensorIterator_ end) {
-            return max(begin, end).value();
+            return element::value(max(begin, end));
         }
         
         template<typename TensorIterator_>
         typename std::iterator_traits<TensorIterator_>::value_type::value_type
         min_value(TensorIterator_ begin, TensorIterator_ end) {
-            return min(begin, end).value();
+            return element::value(min(begin, end));
         }
         
         template<typename TensorIterator_>
         typename std::iterator_traits<TensorIterator_>::value_type::index_type
         max_index(TensorIterator_ begin, TensorIterator_ end) {
-            return max(begin, end).index();
+            return element::index(max(begin, end));
         }
         
         template<typename TensorIterator_>
         typename std::iterator_traits<TensorIterator_>::value_type::index_type
         min_index(TensorIterator_ begin, TensorIterator_ end) {
-            return min(begin, end).index();
+            return element::index(min(begin, end));
         }
 
         template<typename TensorIterator_>
@@ -84,9 +84,10 @@ namespace em {
         typename std::iterator_traits<TensorIterator_>::value_type::value_type
         squared_sum(TensorIterator_ begin, TensorIterator_ end) {
             using value_type = typename TensorIterator_::value_type::value_type;
-            value_type ss;
+            value_type ss = value_type();
             for(auto itr = begin; itr != end; ++itr) {
-                ss += itr->value() * itr->value();
+                value_type val = element::value((*itr));
+                ss += val*val;
             }
             return ss;
         }

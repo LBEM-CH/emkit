@@ -2,7 +2,11 @@
 #ifndef INDEX_VALUE_PAIR_HPP
 #define INDEX_VALUE_PAIR_HPP
 
+#include <iostream>
+#include <type_traits>
+
 #include "index.hpp"
+#include "tensor_storage_order.hpp"
 
 namespace em {
     namespace element {
@@ -12,6 +16,7 @@ namespace em {
             
         public:
             
+            static const size_t rank = rank_;
             typedef ValueType_ value_type;
             typedef Index<rank_> index_type;
             
@@ -21,11 +26,7 @@ namespace em {
             : index_(idx), value_(val) {
             };
             
-            Index<rank_>& index() {
-                return index_;
-            }
-            
-            const Index<rank_>& index() const{
+            Index<rank_> index() const{
                 return index_;
             }
             
@@ -40,8 +41,20 @@ namespace em {
             private:
             Index<rank_> index_;
             ValueType_* value_;
-
+ 
         };
+        
+        template<typename IndexValuePair_>
+        typename IndexValuePair_::index_type 
+        index(IndexValuePair_ pair) {
+            return pair.index();
+        }
+        
+        template<typename IndexValuePair_>
+        typename IndexValuePair_::value_type 
+        value(IndexValuePair_ pair) {
+            return pair.value();
+        }
     }
 }
 
