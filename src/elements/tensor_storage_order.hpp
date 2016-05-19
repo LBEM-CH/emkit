@@ -24,7 +24,7 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "range.hpp"
+#include "index.hpp"
 
 namespace em {
     
@@ -42,20 +42,19 @@ namespace em {
             static const int kRank = rank_;
             static const StorageOrder kFormat = format_;
             using IndexType = Index<rank_>;
-            using RangeType = Range<rank_>;
-            using MemoryIdType = typename RangeType::value_type;
+            using MemoryIdType = typename IndexType::value_type;
 
         public:
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& origin) {
+            static IndexType map(const MemoryIdType& id, const IndexType& range, const IndexType& origin) {
                 return IndexType(0);
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& origin) {
+            static MemoryIdType map(const IndexType& idx, const IndexType& range, const IndexType& origin) {
                 return 0;
             }
 
-            static IndexType get_stride(const RangeType& range) {
+            static IndexType get_stride(const IndexType& range) {
                 return IndexType(0);
             }
 
@@ -68,10 +67,9 @@ namespace em {
             static const int kRank = rank_;
             static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
             using IndexType = Index<rank_>;
-            using RangeType = Range<rank_>;
-            using MemoryIdType = typename RangeType::value_type;
+            using MemoryIdType = typename IndexType::value_type;
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& origin) {
+            static IndexType map(const MemoryIdType& id, const IndexType& range, const IndexType& origin) {
                 assert(range.size() > id);
                 IndexType idx;
                 MemoryIdType temp_id = id;
@@ -83,7 +81,7 @@ namespace em {
                 return idx - origin;
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& origin) {
+            static MemoryIdType map(const IndexType& idx, const IndexType& range, const IndexType& origin) {
                 assert(range.contains(idx));
                 MemoryIdType memory_id = 0;
                 IndexType strides = get_stride(range);
@@ -96,7 +94,7 @@ namespace em {
                 return memory_id;
             };
 
-            static IndexType get_stride(const RangeType& range) {
+            static IndexType get_stride(const IndexType& range) {
                 IndexType strides(1);
                 if (range.rank > 1) {
                     for (int idx = rank_ - 1; idx >= 0; --idx) {
@@ -115,10 +113,9 @@ namespace em {
             static const int kRank = rank_;
             static const StorageOrder kFormat = StorageOrder::COLUMN_MAJOR;
             using IndexType = Index<rank_>;
-            using RangeType = Range<rank_>;
-            using MemoryIdType = typename RangeType::value_type;
+            using MemoryIdType = typename IndexType::value_type;
 
-            static IndexType map(const MemoryIdType& id, const RangeType& range, const IndexType& origin) {
+            static IndexType map(const MemoryIdType& id, const IndexType& range, const IndexType& origin) {
                 assert(range.contains(origin));
                 assert(range.size() > id);
                 IndexType idx;
@@ -131,7 +128,7 @@ namespace em {
                 return (idx - origin);
             };
 
-            static MemoryIdType map(const IndexType& idx, const RangeType& range, const IndexType& origin) {
+            static MemoryIdType map(const IndexType& idx, const IndexType& range, const IndexType& origin) {
                 assert(range.contains(origin));
                 assert(range.contains(idx));
                 MemoryIdType memory_id = 0;
@@ -145,7 +142,7 @@ namespace em {
                 return memory_id;
             };
 
-            static IndexType get_stride(const RangeType& range) {
+            static IndexType get_stride(const IndexType& range) {
                 IndexType strides;
 
                 for (size_t idx = 0; idx < rank_; ++idx) {

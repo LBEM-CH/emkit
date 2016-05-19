@@ -25,7 +25,6 @@
 #include "../src/elements/string.hpp"
 #include "../src/elements/properties_map.hpp"
 #include "../src/elements/index.hpp"
-#include "../src/elements/range.hpp"
 #include "../src/elements/tensor.hpp"
 #include "../src/elements/tensor_iterator.hpp"
 
@@ -39,8 +38,8 @@ namespace em {
     using Index2d = Index<2>;
     using Index3d = Index<3>;
     
-    using Range2d = Range<2>;
-    using Range3d = Range<3>;
+    using Range2d = Index<2>;
+    using Range3d = Index<3>;
     
     using TensorF2dC = Tensor<float, 2, StorageOrder::COLUMN_MAJOR>;
     using TensorF3dC = Tensor<float, 3, StorageOrder::COLUMN_MAJOR>;

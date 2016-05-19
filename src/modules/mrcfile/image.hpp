@@ -136,7 +136,7 @@ namespace em {
                     std::cerr << "WARNING: The specified format (" << format << ") is not a"
                             << " standard MRC format. Please choose from:"
                             << "\n\t mrc, map\n"
-                            << "Trying to use the classical old MRC format.";
+                            << "Trying to use the classical old MRC format.\n";
                     return std::shared_ptr<FormatSpecifier>(new FormatSpecifier());
                 }
 

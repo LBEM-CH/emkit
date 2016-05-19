@@ -16,12 +16,17 @@
  * 
  */
 
-#ifndef EMKIT_H
-#define EMKIT_H
+#ifndef FOURIER_FILTER_HPP
+#define FOURIER_FILTER_HPP
 
-#include "elements.h"
-#include "objects.h"
-#include "algorithms.h"
-#include "fileio.h"
+namespace em {
+    
+    namespace algorithm {
+        
+    
+        
+    }
+}
 
-#endif
+#endif /* FOURIER_FILTER_HPP */
+

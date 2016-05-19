@@ -19,11 +19,8 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
-#include "../src/objects/object.hpp"
-#include "../src/objects/real_object.hpp"
-#include "../src/objects/complex_object.hpp"
-#include "../src/objects/mrc_object.hpp"
-#include "../src/objects/hkl_object.hpp"
+#include "../src/objects/object_base_types.hpp"
+#include "../src/objects/complex_half_object.hpp"
 
 namespace em {
     

@@ -35,8 +35,8 @@ namespace em {
         protected:
             typedef TensorIterator<ValueType_, rank_, order_, is_const_iterator_> Self_;
             typedef typename std::conditional<is_const_iterator_, const Tensor<ValueType_, rank_, order_>, Tensor<ValueType_, rank_, order_>>::type TensorType_;
+            typedef TensorType_* TensorTypePtr_;
             typedef Index<rank_> index_type;
-            typedef Range<rank_> range_type;
             typedef typename index_type::size_type size_type;
             typedef MemoryArranger<rank_, order_> order_arranger_type;
 
@@ -53,7 +53,7 @@ namespace em {
             : tensor_container_(), index_(0) {
             }
 
-            TensorIterator(TensorType_* base_ptr, size_type index)
+            TensorIterator(TensorTypePtr_ base_ptr, size_type index)
             : tensor_container_(base_ptr), index_(index) {
             }
 
@@ -140,7 +140,7 @@ namespace em {
                 return temp;
             }
 
-            TensorType_* base() {
+            TensorTypePtr_ base() {
                 return tensor_container_;
             }
 
@@ -156,7 +156,7 @@ namespace em {
             }
             
             size_type index_;
-            TensorType_* tensor_container_;
+            TensorTypePtr_ tensor_container_;
             value_type pair_;
 
         };

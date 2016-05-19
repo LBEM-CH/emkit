@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
      * Sectioning example
      *************************************/
     Index<2> start = {nx/2, ny/2};
-    Range<2> extent = image.range() - start;
+    Index<2> extent = image.range() - start;
     cout << "Section starting from: " << start << " of length: " << extent << "\n";
     cout << image.section(start, extent);
     cout << "\n";
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
     complex_image.transform_origin({0, ny/2});
     cout << "Transformed origin Fourier image:\n" << complex_image << endl;
     
-    ComplexImageRM complex_image_rm(complex_image.range(), complex_image.origin(), ComplexImageCM::value_type(0,0));
+    ComplexImageRM complex_image_rm(complex_image.range(), complex_image.origin(), ComplexImageCM::data_type(0,0));
     convert(complex_image, complex_image_rm);
     cout << "Reordered Fourier transformed image:\n" << complex_image_rm << endl; 
     

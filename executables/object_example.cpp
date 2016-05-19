@@ -4,6 +4,7 @@
 #include "objects.h"
 #include "elements.h"
 #include "algorithms.h"
+#include "fileio.h"
 
 using namespace std;
 using namespace em;
@@ -15,14 +16,14 @@ int main(int argc, char** argv) {
         exit(1);
     }
     
-    typedef Object<double, 3> Volume;
-    typedef Tensor<double, 3> Array3D;
+    typedef RealObject<double, 3> Volume;
 
-    MRCObject<double> mrc_file(argv[1]);
-    mrc_file.load();
+    Volume input;
+    PropertiesMap header_values;
+    MRCFile(argv[1]).load(input, header_values);
     
     std::cout << "Read the following header fields:\n";
-    std::cout << mrc_file.properties() << std::endl;
+    std::cout << header_values << std::endl;
     
     return 0;
     

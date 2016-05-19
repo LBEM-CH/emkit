@@ -4,6 +4,7 @@
 
 #include "objects.h"
 #include "elements.h"
+#include "fileio.h"
 
 using namespace std;
 using namespace em;
@@ -21,16 +22,16 @@ int main(int argc, char** argv) {
     double radius = stoi(argv[4]);
     std::string output_file = argv[5];
     
-    MRCObject<double> mrc_object(Range3d({nx, ny, nz}), output_file);
+    RealObject<double, 3> circle(Range3d({nx, ny, nz}));
     
     Index3d center = {nx/2, ny/2, nz/2};
-    for(auto& val : mrc_object.container()) {
+    for(auto& val : circle) {
         if(center.distance(val.index()) < radius) {
             val.value() = 1.0;
         }
     }
     
-    mrc_object.save();
+    write(output_file, circle);
     
     return 0;
 }

@@ -306,13 +306,50 @@ namespace em {
                 os << ") ";
                 return os;
             }
+            
+             /*********************************************
+             * @defgroup MemberFunctions member functions
+             * @{
+             *********************************************/
 
+            /**
+             * @brief       Returns the hyper volume of the rectangular space 
+             *              enclosed ,ie, product of all components  
+             * @ingroup     member_functions
+             * @return the size
+             */
+            const value_type size() const {
+                value_type sz = 1;
+                for (int idx = 0; idx < rank_; ++idx) sz = sz*at(idx);
+                return sz;
+            }
+
+            /**
+             * @brief       Checks if the index provided is contained in the range
+             * @ingroup     member_functions
+             * @param       index
+             * @return 
+             */
+            bool contains(const Index<rank_>& index) const {
+                for (int idx = 0; idx < rank_; ++idx)
+                    if (std::abs(index[idx]) >= at(idx))
+                        return false;
+                return true;
+            }
+
+            /**
+             * @brief       Calculates distance between two indices
+             * @param       other
+             * @return 
+             */
             double distance(const Index& other) const {
                 Index<3> diff = *this-other;
                 double dist = 0;
                 for(int i=0; i<3; ++i) dist += diff[i]*diff[i];
                 return dist;
             }
+            
+            /**@}*/
             
         private:
             std::array<value_type, rank_> data_; //Data stored as array

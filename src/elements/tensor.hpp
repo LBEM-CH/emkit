@@ -34,61 +34,65 @@
 namespace em {
     namespace element {
 
-        template<typename ValueType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
+        template<typename DataType_, size_t rank_, StorageOrder order_, bool is_const_iterator_>
         class TensorIterator;
         
-        template<typename ValueType_, size_t rank_ = 1, StorageOrder order_ = StorageOrder::COLUMN_MAJOR>
+        template<typename DataType_, size_t rank_, StorageOrder order_>
         class Tensor {
         public:
-            using index_type = Index<rank_>;
-            using range_type = Range<rank_>;
-            using arranger_type = MemoryArranger<rank_, order_>;
-            using data_type = std::vector<ValueType_>;
-            using self_ = Tensor<ValueType_, rank_, order_>;
-
             static const int rank = rank_;
             static const StorageOrder storage_order = order_;
-            using value_type = ValueType_;
-            using iterator = TensorIterator<ValueType_, rank_, order_, false>;
-            using const_iterator = TensorIterator<ValueType_, rank_, order_, true>;
-            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-            using reverse_iterator = std::reverse_iterator<iterator>;
-            using reference = ValueType_&;
-            using const_reference = const ValueType_&;
-            using pointer = typename std::add_pointer<ValueType_>::type;
-            using difference_type = std::ptrdiff_t;
-            using size_type = typename Range<rank_>::size_type;
+            using index_type = Index<rank_>;
+            using data_type = DataType_;
+            using arranger_type = MemoryArranger<rank_, order_>;
 
+            //For STL Random Access Iterator
+            using value_type = IndexValuePair<DataType_, rank_>;
+            using iterator = TensorIterator<DataType_, rank_, order_, false>;
+            using const_iterator = TensorIterator<DataType_, rank_, order_, true>;
+            using reference = DataType_&;
+            using const_reference = const DataType_&;
+            using pointer = typename std::add_pointer<DataType_>::type;
+            using difference_type = std::ptrdiff_t;
+            using size_type = typename Index<rank_>::size_type;
+            using reverse_iterator = std::reverse_iterator<iterator>;
+            using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        private:
+            using SelfType_ = Tensor<DataType_, rank_, order_>;
+            using RepType_ = std::vector<DataType_>;
+        
+        public:
             /**
              * Constructors
              */
 
             Tensor()
-            : range_(), origin_(0), container_() {
+            : range_(), origin_(0), data_container_() {
             };
             
-            Tensor(const range_type& range, const value_type& default_value = ValueType_())
-            : range_(range), origin_(0), container_(data_type(range.size(), default_value)) {
+            Tensor(const index_type& range, const data_type& default_value = DataType_())
+            : range_(range), origin_(0), data_container_(RepType_(range.size(), default_value)) {
             }
             
-            Tensor(const range_type& range, const index_type& origin, const value_type& default_value = ValueType_())
-            : range_(range), origin_(origin), container_(data_type(range.size(), default_value)) {
+            Tensor(const index_type& range, const index_type& origin, const data_type& default_value = DataType_())
+            : range_(range), origin_(origin), data_container_(RepType_(range.size(), default_value)) {
                 assert(range.contains(origin));
             }
 
-            Tensor(const range_type& range, const data_type& data) 
-            : range_(range), origin_(0), container_(data) {
+            Tensor(const index_type& range, const RepType_& data) 
+            : range_(range), origin_(0), data_container_(data) {
                 assert(range.size() == data.size());
             };
             
-            Tensor(const range_type& range, const index_type& origin, const data_type& data) 
-            : range_(range), origin_(origin), container_(data) {
+            Tensor(const index_type& range, const index_type& origin, const RepType_& data) 
+            : range_(range), origin_(origin), data_container_(data) {
                 assert(range.size() == data.size());
                 assert(range.contains(origin));
             };
             
-            Tensor(const range_type& range, const pointer& data) 
-            : range_(range_), origin_(0), container_(data_type(data, data + range.size())){
+            Tensor(const index_type& range, const pointer& data) 
+            : range_(range_), origin_(0), data_container_(RepType_(data, data + range.size())){
             }
             
             Tensor(const Tensor& other) {
@@ -114,75 +118,75 @@ namespace em {
              * Element Access
              */
             
-            const_reference operator[](const index_type& idx) const {
+            virtual const_reference operator[](const index_type& idx) const {
                 size_type memory_id = arranger_type::map(idx, range_, origin_);
-                return container_[memory_id];
+                return data_container_[memory_id];
             }
 
-            reference operator[](const index_type& idx) {
-                return const_cast<reference> (static_cast<const Tensor<value_type, rank_, order_> &> (*this).operator[](idx));
+            virtual reference operator[](const index_type& idx) {
+                return const_cast<reference> (static_cast<const Tensor<data_type, rank_, order_> &> (*this).operator[](idx));
             }
 
-            const_reference at(const index_type& idx) const {
+            virtual const_reference at(const index_type& idx) const {
                 size_type memory_id = arranger_type::map(idx, range_, origin_);
-                return container_.at(memory_id);
+                return data_container_.at(memory_id);
             }
             
-            reference at(const index_type& idx) {
+            virtual reference at(const index_type& idx) {
                 size_type memory_id = arranger_type::map(idx, range_, origin_);
-                return container_.at(memory_id);
+                return data_container_.at(memory_id);
             }
             
             const_reference operator[](const size_type& idx) const {
                 assert(range_.size() > idx);
-                return container_[idx];
+                return data_container_[idx];
             }
 
             reference operator[](const size_type& idx) {
                 assert(range_.size() > idx);
-                return container_[idx];
+                return data_container_[idx];
             }
 
             const_reference at(const size_type& idx) const {
                 assert(range_.size() > idx);
-                return container_.at(idx);
+                return data_container_.at(idx);
             }
             
             reference at(const size_type& idx) {
                 assert(range_.size() > idx);
-                return container_.at(idx);
+                return data_container_.at(idx);
             }
 
             const pointer data() const {
-                return container_.data();
+                return data_container_.data();
             }
 
             pointer data() {
-                return container_.data();
+                return data_container_.data();
             }
 
-            data_type& vectorize() {
-                return container_;
+            RepType_& vectorize() {
+                return data_container_;
             }
 
-            const data_type& vectorize() const {
-                return container_;
+            const RepType_& vectorize() const {
+                return data_container_;
             }
             
             const reference front() const {
-                return container_.front();
+                return data_container_.front();
             }
             
             reference front() {
-                return container_.front();
+                return data_container_.front();
             }
             
             const reference back() const {
-                return container_.back();
+                return data_container_.back();
             }
             
             reference back() {
-                return container_.back();
+                return data_container_.back();
             }
 
             
@@ -201,6 +205,14 @@ namespace em {
             const_iterator cbegin() const {
                 return const_iterator(this, 0);
             }
+            
+            reverse_iterator rbegin() {
+                return reverse_iterator(end());
+            }
+            
+            const_reverse_iterator rbegin() const {
+                return const_reverse_iterator(end());
+            }
 
             iterator end() {
                 return iterator(this, size());
@@ -214,12 +226,20 @@ namespace em {
                 return const_iterator(this, size());
             }
             
+            reverse_iterator rend() {
+                return reverse_iterator(begin());
+            }
+            
+            const_reverse_iterator rend() const {
+                return const_reverse_iterator(begin());
+            }
+            
             
             /*
              * Capacity
              */
 
-            range_type range() const {
+            index_type range() const {
                 return range_;
             }
             
@@ -236,7 +256,7 @@ namespace em {
             }
 
             bool empty() const {
-                return container_.empty();
+                return data_container_.empty();
             }
             
             /*
@@ -247,28 +267,29 @@ namespace em {
        
                 //TODO: Program this efficiently with memory copy
                 
-                Tensor<value_type, rank_, order_> temp(range(), new_origin, value_type());
+                Tensor<data_type, rank_, order_> temp(range(), new_origin, data_type());
                 for (const auto& itr : *this) {
                     temp.at(itr.index()) = itr.value();
                 }
                 this->reset(temp);
             }
             
-            void reshape(const range_type& new_range) {
+            void reshape(const index_type& new_range) {
                 assert(new_range.size() ==  range_.size());
                 range_ = new_range;
             }
             
-            void resize(const range_type& range) {
+            void resize(const index_type& range) {
+                assert(range.contains(origin()));
                 range_ = range;
-                container_.resize(range.size());
+                data_container_.resize(range.size());
             }
             
             template<StorageOrder order>
-            void reset(const Tensor<value_type, rank_, order>& other) {
+            void reset(const Tensor<data_type, rank_, order>& other) {
                 range_ = other.range_;
                 origin_ = other.origin_;
-                if(order == order_) container_ = other.container_;
+                if(order == order_) data_container_ = other.data_container_;
                 else {
                     for(const auto& data : other) {
                         at(data.index()) = data.value();
@@ -279,14 +300,14 @@ namespace em {
             void reset(Tensor&& other) {
                 range_ = std::move(other.range_);
                 origin_ = std::move(other.origin_);
-                container_ = std::move(other.container_);
+                data_container_ = std::move(other.data_container_);
             }
             
             void clear() {
-                container_.clear();
+                data_container_.clear();
             }
             
-            void insert(const index_type& idx, const value_type& value) {
+            void insert(const index_type& idx, const data_type& value) {
                 at(idx) = value;
             }
             
@@ -299,7 +320,7 @@ namespace em {
             /**
              * Output/Print
              */
-            friend inline std::ostream& operator<<(std::ostream& os, const self_& obj) {
+            friend inline std::ostream& operator<<(std::ostream& os, const SelfType_& obj) {
                 for(const auto& itr : obj) {
                     os << itr.index() << " -> " << itr.value() << "\n";
                 }
@@ -309,55 +330,55 @@ namespace em {
             /**
              * Arithmetic operations
              */
-            self_ operator+(const self_& right) const {
+            SelfType_ operator+(const SelfType_& right) const {
                 assert(range() == right.range());
-                static_assert(std::is_arithmetic<value_type>::value, "The value_type in the tensor class should be arithmetic");
-                self_ result(range());
-                std::transform(container_.begin(), container_.end(), right.container_.begin(),
-                        std::back_inserter(result.container_), std::plus<value_type>());
+                static_assert(std::is_arithmetic<data_type>::value, "The value_type in the tensor class should be arithmetic");
+                SelfType_ result(range());
+                std::transform(data_container_.begin(), data_container_.end(), right.data_container_.begin(),
+                        std::back_inserter(result.data_container_), std::plus<data_type>());
                 return result;
             }
 
-            self_& operator+=(const self_& right) {
+            SelfType_& operator+=(const SelfType_& right) {
                 return *this +right;
             }
 
-            self_ operator-(const self_& right) const {
+            SelfType_ operator-(const SelfType_& right) const {
                 assert(range() == right.range());
-                static_assert(std::is_arithmetic<value_type>::value, "The value_type in the tensor class should be arithmetic");
-                self_ result(range());
-                std::transform(container_.begin(), container_.end(), right.container_.begin(),
-                        std::back_inserter(result.container_), std::minus<value_type>());
+                static_assert(std::is_arithmetic<data_type>::value, "The value_type in the tensor class should be arithmetic");
+                SelfType_ result(range());
+                std::transform(data_container_.begin(), data_container_.end(), right.data_container_.begin(),
+                        std::back_inserter(result.data_container_), std::minus<data_type>());
                 return result;
             }
 
-            self_& operator-=(const self_& right) {
+            SelfType_& operator-=(const SelfType_& right) {
                 return *this-right;
             }
 
             template<typename ArithmaticType_>
-            self_ operator+(const ArithmaticType_& right) {
-                static_assert(std::is_arithmetic<value_type>::value, "The value_type in the tensor class should be arithmetic");
+            SelfType_ operator+(const ArithmaticType_& right) {
+                static_assert(std::is_arithmetic<data_type>::value, "The value_type in the tensor class should be arithmetic");
                 static_assert(std::is_arithmetic<ArithmaticType_>::value, "The value_type should be arithmetic");
-                std::for_each(container_.begin(), container_.end(), [&](value_type val) {
+                std::for_each(data_container_.begin(), data_container_.end(), [&](data_type val) {
                     return val + right;
                 });
             }
 
             template<typename ArithmaticType_>
-            self_ operator-(const ArithmaticType_& right) {
-                static_assert(std::is_arithmetic<value_type>::value, "The value_type in the tensor class should be arithmetic");
+            SelfType_ operator-(const ArithmaticType_& right) {
+                static_assert(std::is_arithmetic<data_type>::value, "The value_type in the tensor class should be arithmetic");
                 static_assert(std::is_arithmetic<ArithmaticType_>::value, "The value_type should be arithmetic");
-                std::for_each(container_.begin(), container_.end(), [&](value_type val) {
+                std::for_each(data_container_.begin(), data_container_.end(), [&](data_type val) {
                     return val - right;
                 });
             }
 
             template<typename ArithmaticType_>
-            self_ operator*(const ArithmaticType_& right) {
-                static_assert(std::is_arithmetic<value_type>::value, "The value_type in the tensor class should be arithmetic");
+            SelfType_ operator*(const ArithmaticType_& right) {
+                static_assert(std::is_arithmetic<data_type>::value, "The value_type in the tensor class should be arithmetic");
                 static_assert(std::is_arithmetic<ArithmaticType_>::value, "The value_type should be arithmetic");
-                std::for_each(container_.begin(), container_.end(), [&](value_type val) {
+                std::for_each(data_container_.begin(), data_container_.end(), [&](data_type val) {
                     return val*right;
                 });
             }
@@ -366,15 +387,15 @@ namespace em {
              * Slicing
              */
 
-            Tensor<value_type, rank_ - 1, order_> slice(typename index_type::value_type slice_number) const {
+            Tensor<data_type, rank_ - 1, order_> slice(typename index_type::value_type slice_number) const {
                 static_assert(rank_ > 1, "The rank should be more than 1 for slicing");
                 assert(slice_number < range_[rank_ - 1]);
-                Range < rank_ - 1 > slice_range;
+                Index < rank_ - 1 > slice_range;
                 for (int i = 0; i < rank_ - 1; ++i) slice_range[i] = range_[i];
                 size_t start = slice_number * slice_range.size();
                 size_t extent = (slice_number+1) * slice_range.size();
-                data_type slice_vector = data_type(container_.data() + start, container_.data() + extent);
-                Tensor<value_type, rank_ - 1, order_> sliced(slice_range, slice_vector); 
+                RepType_ slice_vector = RepType_(data_container_.data() + start, data_container_.data() + extent);
+                Tensor<data_type, rank_ - 1, order_> sliced(slice_range, slice_vector); 
                 return sliced;
             }
 
@@ -383,9 +404,9 @@ namespace em {
              * Sectioning
              */
 
-            self_ section(const index_type& begin_index, const range_type& section_range) const {
+            SelfType_ section(const index_type& begin_index, const index_type& section_range) const {
                 assert(range_.contains(section_range + begin_index - index_type(1)));
-                self_ cut(section_range, value_type());
+                SelfType_ cut(section_range, data_type());
                 for(auto& val : cut) {
                     val.value() = at(val.index()+begin_index);
                 }
@@ -395,46 +416,46 @@ namespace em {
 
         private:
 
-            range_type range_;
+            index_type range_;
             index_type origin_;
-            data_type container_;
+            RepType_ data_container_;
 
         };
         
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator==(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator==(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.range() == rhs.range() && lhs.vectorize() == rhs.vectorize());
         };
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator!=(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator!=(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.range() != rhs.range() || lhs.vectorize() != rhs.vectorize());
         };
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator<(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator<(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.vectorize() < rhs.vectorize());
         };
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator<=(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator<=(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.vectorize() <= rhs.vectorize());
         };
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator>(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator>(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.vectorize() > rhs.vectorize());
         };
         
-        template<typename ValueType_, int rank_, StorageOrder order_>
-        bool operator>=(const Tensor<ValueType_, rank_, order_>& lhs,
-                const Tensor<ValueType_, rank_, order_>& rhs) {
+        template<typename DataType_, size_t rank_, StorageOrder order_>
+        bool operator>=(const Tensor<DataType_, rank_, order_>& lhs,
+                const Tensor<DataType_, rank_, order_>& rhs) {
             return(lhs.vectorize() >= rhs.vectorize());
         };
     }

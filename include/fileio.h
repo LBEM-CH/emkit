@@ -16,12 +16,18 @@
  * 
  */
 
-#ifndef EMKIT_H
-#define EMKIT_H
+#ifndef FILEIO_H
+#define FILEIO_H
 
-#include "elements.h"
-#include "objects.h"
-#include "algorithms.h"
-#include "fileio.h"
+#include "../src/fileio/file_io.hpp"
+#include "../src/fileio/mrc_file.hpp"
+#include "../src/fileio/hkl_object.hpp"
 
-#endif
+namespace em {
+    
+    using namespace fileio;
+    
+}
+
+#endif /* FILEIO_H */
+

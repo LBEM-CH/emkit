@@ -26,7 +26,6 @@
 
 #include "../elements/complex.hpp"
 
-#include "complex_object.hpp"
 
 namespace em {
 
@@ -51,10 +50,7 @@ namespace em {
 
             }
 
-            template<typename ValueType_>
-            void load_object(ComplexObject<ValueType_, 3>& object) {
-
-            }
+            
 
 
         private:
