@@ -39,16 +39,23 @@ namespace em {
             MRCFile(std::string file_name = "", std::string format = "")
             : file_name_(file_name), format_(format) {
             };
-
+            
             template<typename ObjectType_>
-            bool load(ObjectType_& object, element::PropertiesMap& header_values = element::PropertiesMap()) {
+            typename std::enable_if<!object::is_real_valued<typename ObjectType_::data_type>::value, bool>::type 
+            load(ObjectType_& object, element::PropertiesMap& header_values) {
+                std::cerr << "MRC type files can read only real valued objects\n";
+                return false;
+            }
+            
+            template<typename ObjectType_>
+            typename std::enable_if<object::is_real_valued<typename ObjectType_::data_type>::value, bool>::type 
+            load(ObjectType_& object, element::PropertiesMap& header_values) {
                 
                 using object_type = ObjectType_;
                 static const size_t rank_ = object::object_traits<ObjectType_>::rank;
                 using index_type = typename object::object_traits<ObjectType_>::index_type;
                 using data_type = typename object::object_traits<ObjectType_>::data_type;
                 
-                static_assert(object::is_real_valued<data_type>::value, "MRC type files can read only real valued objects\n");
                 static_assert((rank_ == 2 || rank_ == 3), "To read a MRC type file, the rank of the object should be either 2 or 3 ");
                 
                 mrc::Image mrc_image_ = get_mrc_image();

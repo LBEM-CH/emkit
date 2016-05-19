@@ -1,6 +1,0 @@
-#include "../src/components/object_base.hpp"
-#include "../src/components/object_data_base.hpp"
-#include "../src/components/object_header_base.hpp"
-#include "../src/components/object_morpher_base.hpp"
-#include "../src/components/volume.hpp"
-#include "../src/components/stack.hpp"

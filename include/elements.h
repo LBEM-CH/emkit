@@ -38,9 +38,6 @@ namespace em {
     using Index2d = Index<2>;
     using Index3d = Index<3>;
     
-    using Range2d = Index<2>;
-    using Range3d = Index<3>;
-    
     using TensorF2dC = Tensor<float, 2, StorageOrder::COLUMN_MAJOR>;
     using TensorF3dC = Tensor<float, 3, StorageOrder::COLUMN_MAJOR>;
     using TensorF2dR = Tensor<float, 2, StorageOrder::ROW_MAJOR>;

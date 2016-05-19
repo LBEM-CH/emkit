@@ -90,7 +90,7 @@ namespace em {
             };
 
             template<typename ArithmeticType_>
-            Complex& operator*=(ArithmeticType_ factor) const {
+            Complex& operator*=(ArithmeticType_ factor) {
                 *this = (*this) * factor;
                 return *this;
             };
@@ -182,8 +182,8 @@ namespace em {
              */
             void set_amplitude(value_type amplitude) {
                 value_type current_amplitude = this->amplitude();
-                if (current_amplitude != 0.0) * this *= (amplitude / current_amplitude);
-
+                if (current_amplitude != 0.0) (*this) *= (amplitude / current_amplitude);
+                else complex_.real(amplitude);
             };
 
             /**

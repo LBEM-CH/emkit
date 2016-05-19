@@ -29,22 +29,14 @@ namespace em {
     namespace object {
         
         template<typename DataType_>
-        struct is_real_valued {
-            static const bool value = std::is_fundamental<DataType_>::value;
-        };
-        
-        /*
+        struct is_real_valued : std::integral_constant<bool, std::is_fundamental<DataType_>::value>{};
+                
         template<typename DataType_>
-        struct is_complex_valued {
-            static const bool value = false;
-        };
+        struct is_complex_valued : std::false_type {};
+
+        template<typename DataType_>
+        struct is_complex_valued<element::Complex<DataType_>> : std::true_type {};
         
-        template<>
-        template<typename ValueType_>
-        struct is_complex_valued<element::Complex<ValueType_> {
-            static const bool value = true;
-        };
-        */
         
         template<typename ObjectType_>
         struct object_traits {

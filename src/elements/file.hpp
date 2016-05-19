@@ -104,6 +104,14 @@ namespace em {
                 int rc = stat(file_name().c_str(), &stat_buf);
                 return rc == 0 ? stat_buf.st_size : -1;
             };
+            
+            size_t number_of_lines() const {
+                size_t num_of_lines = 0;
+                FILE *infile = fopen(_filename.c_str(), "r");
+                int ch;
+                while (EOF != (ch=getc(infile))) if ('\n' == ch) ++num_of_lines;
+                return num_of_lines;
+            }
 
             /**
              * @brief           Reads a line from the current position

@@ -21,7 +21,7 @@
 
 #include "../src/fileio/file_io.hpp"
 #include "../src/fileio/mrc_file.hpp"
-#include "../src/fileio/hkl_object.hpp"
+#include "../src/fileio/reflection_file.hpp"
 
 namespace em {
     

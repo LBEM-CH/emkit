@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     double radius = stoi(argv[4]);
     std::string output_file = argv[5];
     
-    RealObject<double, 3> circle(Range3d({nx, ny, nz}));
+    RealObject<double, 3> circle(Index3d({nx, ny, nz}));
     
     Index3d center = {nx/2, ny/2, nz/2};
     for(auto& val : circle) {

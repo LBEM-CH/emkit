@@ -74,7 +74,7 @@ namespace em {
             //Check the provided size
             assert(logical_range.size() <= complex.range().size()*2);
 
-            std::vector<double> input;
+            std::vector<double> input = std::vector<double>(complex.range().size()*2);
             for (int id = 0; id < complex.range().size(); id++) {
                 input[2 * id] = (double) complex[id].real();
                 input[2 * id + 1] = (double) complex[id].imag();
@@ -89,7 +89,7 @@ namespace em {
             real = element::Tensor<ValueType_, rank_, element::StorageOrder::COLUMN_MAJOR>(logical_range, output);
         }
         
-        /*
+        
         template<typename ValueType_, size_t rank_>
         void fourier_transform(const object::RealObject<ValueType_, rank_>& real, 
                                object::ComplexHalfObject<ValueType_, rank_>& complex) {
@@ -101,8 +101,8 @@ namespace em {
         void fourier_transform(const object::ComplexHalfObject<ValueType_, rank_>& complex, 
                                object::RealObject<ValueType_, rank_>& real) {
             real = object::RealObject<ValueType_, rank_>(complex.logical_range());
-            fourier_transform(real.range(), complex.container(), real.container());
-        }*/
+            fourier_transform(real.range(), complex, real);
+        }
     }
 }
 
