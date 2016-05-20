@@ -21,23 +21,27 @@
 
 #include <iostream>
 #include <cassert>
+#include <type_traits>
 
 namespace em {
     
     namespace algorithm {
 
         /**
-         * ROW MAJOR to COLUMN MAJOR converter
+         * Tensor Storage Order Converter
          * @param input
          * @param output
          */
         template<typename TensorInputType_, typename TensorOutputType_>
-        void convert(const TensorInputType_& input,
-                TensorOutputType_& output) {
+        typename std::enable_if< std::is_same<typename TensorInputType_::data_type, typename TensorOutputType_::data_type>::value 
+                        && TensorInputType_::rank == TensorOutputType_::rank, void>::type
+        convert(const TensorInputType_& input, TensorOutputType_& output) {
 
             assert(input.range() == output.range());
 
             for (const auto& itr : input) {
+                //auto idx = TensorOutputType_::arranger_type::map(itr.index(), output.range(), output.origin());
+                //std::cout << itr.index() << " -> " << TensorOutputType_::arranger_type::map(idx, output.range(), output.origin()) << std::endl;
                 output[itr.index()] = itr.value();
             }
 

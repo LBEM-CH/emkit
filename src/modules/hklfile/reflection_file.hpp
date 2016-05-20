@@ -62,11 +62,9 @@ namespace em {
                 }
                 
                 std::string sLine;
-                int num_of_lines = element::File(file_name_).number_of_lines();
-                
                 for(int header_line=0; header_line<header_lines_; header_line++) std::getline(ifs, sLine);
                 
-                for(int line=header_lines_; line<num_of_lines; ++line) {
+                while(!ifs.eof()) {
                     std::vector<int> index;
                     for(int i=0; i< rank_; ++i) {
                         int val;
@@ -84,13 +82,34 @@ namespace em {
                         if(ifs >> val) data.push_back(val);
                         else break;
                     }
-                    //std::cout << "Read: " << ReflectionData(index, data);
-                    data_.push_back(ReflectionData(index, data));
+                    
+                    if(index.size() == rank_ && data.size() == data_cols) {
+                        //std::cout << "Read: " << ReflectionData(index, data);
+                        data_.push_back(ReflectionData(index, data));
+                    }
                 }
                        
                 ifs.close();
                 
                 return true;
+            }
+            
+            bool save() const {
+                const int INT_WIDTH = 5;
+                const int FLOAT_WIDTH = 13;
+                const int FLOAT_PRECISION = 7;
+                
+                std::ofstream hklFile(file_name_);
+                
+                for(const auto& d: data_) {
+                    if(d.index().size() != rank_) continue;
+                    for(int i=0; i< rank_; ++i) hklFile << std::setw(INT_WIDTH) << d.index()[i] << " ";
+                    for(const auto& c : d.data()) hklFile << std::setw(FLOAT_WIDTH) << std::setprecision(FLOAT_PRECISION) << c << " ";
+                    hklFile << std::endl;
+                }
+                
+                hklFile.close();
+                
             }
             
             std::vector<ReflectionData>& data() {

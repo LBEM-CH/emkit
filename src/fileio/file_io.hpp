@@ -37,33 +37,52 @@ namespace em {
         };
         
         template<typename ObjectType_, FileFormat format_>
-        struct read_impl {
+        struct io_impl {
             static bool read(std::string file, ObjectType_& obj) {
+                std::cerr << "ERROR: The format could not be recognized from file: "<< file << "\n\n";
+                return false;
+            }
+            
+            static bool write(std::string file, const ObjectType_& obj) {
                 std::cerr << "ERROR: The format could not be recognized from file: "<< file << "\n\n";
                 return false;
             }
         };
         
         template<typename ObjectType_>
-        struct read_impl<ObjectType_, FileFormat::MRC> {
+        struct io_impl<ObjectType_, FileFormat::MRC> {
             static bool read(std::string file, ObjectType_& obj) {
                 element::PropertiesMap temp;
                 return fileio::MRCFile(file, "mrc").load(obj, temp);
             }
-        };
-        
-        template<typename ObjectType_>
-        struct read_impl<ObjectType_, FileFormat::MAP> {
-            static bool read(std::string file, ObjectType_& obj) {
+            
+            static bool write(std::string file, const ObjectType_& obj) {
                 element::PropertiesMap temp;
-                return fileio::MRCFile(file, "map").load(obj, temp);
+                return fileio::MRCFile(file, "mrc").save(obj, temp);
             }
         };
         
         template<typename ObjectType_>
-        struct read_impl<ObjectType_, FileFormat::HKL> {
+        struct io_impl<ObjectType_, FileFormat::MAP> {
+            static bool read(std::string file, ObjectType_& obj) {
+                element::PropertiesMap temp;
+                return fileio::MRCFile(file, "map").load(obj, temp);
+            }
+            
+            static bool write(std::string file, const ObjectType_& obj) {
+                element::PropertiesMap temp;
+                return fileio::MRCFile(file, "map").save(obj, temp);
+            }
+        };
+        
+        template<typename ObjectType_>
+        struct io_impl<ObjectType_, FileFormat::HKL> {
             static bool read(std::string file, ObjectType_& obj) {
                 return fileio::ReflectionFile(file).load(obj);
+            }
+            
+            static bool write(std::string file, const ObjectType_& obj) {
+                return fileio::ReflectionFile(file).save(obj);
             }
         };
         
@@ -78,9 +97,9 @@ namespace em {
                 format = element::File(file).extension();
             }
 
-            if (format == "mrc" || format == "MRC") return read_impl<ObjectType_, FileFormat::MRC>::read(file, obj);
-            else if (format == "map" || format == "MAP") return read_impl<ObjectType_, FileFormat::MAP>::read(file, obj);
-            else if (format == "hkl" || format == "hk") return read_impl<ObjectType_, FileFormat::HKL>::read(file, obj);
+            if (format == "mrc" || format == "MRC") return io_impl<ObjectType_, FileFormat::MRC>::read(file, obj);
+            else if (format == "map" || format == "MAP") return io_impl<ObjectType_, FileFormat::MAP>::read(file, obj);
+            else if (format == "hkl" || format == "hk") return io_impl<ObjectType_, FileFormat::HKL>::read(file, obj);
             else {
                 std::cerr << "ERROR: The format: " << format << " was not recognized format.\n\n";
                 return false;
@@ -88,12 +107,12 @@ namespace em {
         }
         
         template<typename ObjectType_>
-        bool read(std::string file, ObjectType_& object) {
-            return read(file, "", object);
+        bool read(std::string file, ObjectType_& obj) {
+            return read(file, "", obj);
         }
 
         template<typename ObjectType_>
-        bool write(std::string file, std::string format, const ObjectType_& object) {
+        bool write(std::string file, std::string format, const ObjectType_& obj) {
             //Check for the existence of the file
             if (element::File(file).exists()) {
                 std::cout << "WARNING: File.. " << file << " already exists. Overwriting!\n";
@@ -103,9 +122,9 @@ namespace em {
                 format = element::File(file).extension();
             }
 
-            element::PropertiesMap temp;
-            if (format == "mrc" || format == "MRC") return fileio::MRCFile(file, "mrc").save(object, temp);
-            else if (format == "map" || format == "MAP") return fileio::MRCFile(file, "map)").save(object, temp);
+            if (format == "mrc" || format == "MRC") return io_impl<ObjectType_, FileFormat::MRC>::write(file, obj);
+            else if (format == "map" || format == "MAP") return io_impl<ObjectType_, FileFormat::MAP>::write(file, obj);
+            else if (format == "hkl" || format == "hk") return io_impl<ObjectType_, FileFormat::HKL>::write(file, obj);
             else {
                 std::cerr << "ERROR: The format: " << format << " was not recognized format.\n\n";
                 return false;
@@ -113,8 +132,8 @@ namespace em {
         }
 
         template<typename ObjectType_>
-        bool write(std::string file, ObjectType_& object) {
-            return write(file, "", object);
+        bool write(std::string file, ObjectType_& obj) {
+            return write(file, "", obj);
         }
 
     }
