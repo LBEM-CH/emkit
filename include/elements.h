@@ -25,8 +25,10 @@
 #include "../src/elements/string.hpp"
 #include "../src/elements/properties_map.hpp"
 #include "../src/elements/index.hpp"
+#include "../src/elements/miller_index.hpp"
 #include "../src/elements/tensor.hpp"
 #include "../src/elements/tensor_iterator.hpp"
+#include "../src/elements/table.hpp"
 
 namespace em {
     
@@ -37,6 +39,9 @@ namespace em {
     
     using Index2d = Index<2>;
     using Index3d = Index<3>;
+    
+    using MillerIndex2d = MillerIndex<2>;
+    using MillerIndex3d = MillerIndex<3>;
     
     using TensorF2dC = Tensor<float, 2, StorageOrder::COLUMN_MAJOR>;
     using TensorF3dC = Tensor<float, 3, StorageOrder::COLUMN_MAJOR>;

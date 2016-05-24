@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <typeinfo>
 
 namespace em {
     
@@ -163,6 +164,36 @@ namespace em {
 
                 return s;
             }
+            
+            template<typename ValueType_>
+            static
+            typename std::enable_if<std::is_fundamental<ValueType_>::value, std::string>::type
+            to_string(ValueType_ value) {
+                std::ostringstream converter;
+                if (converter << value) return converter.str();
+                else return "";
+            }
+            
+            template<typename ValueType_>
+            static
+            typename std::enable_if<std::is_fundamental<ValueType_>::value, bool>::type
+            string_to_number(std::string str, ValueType_& value) {
+                std::istringstream ss(str);
+                if (!(ss >> value)) return false;
+                else return true;
+            }
+            
+            template<typename ValueType_>
+            typename std::enable_if<std::is_fundamental<ValueType_>::value, ValueType_>::type
+            number() {
+                ValueType_ value;
+                if(!string_to_number<ValueType_>(_value, value)){
+                    std::cerr << "WARNING: Couldn't convert '" << _value << "' to requested type: "
+                            << typeid (ValueType_).name() << " Using: " << value << " instead..\n";
+                }
+                return value;
+            }
+             
 
         private:
             std::string _value;
