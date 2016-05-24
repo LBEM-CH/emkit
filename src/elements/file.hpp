@@ -127,7 +127,16 @@ namespace em {
             
             InputFile(std::string file_name) 
             : File(file_name) {
-                if(exists()) stream_ .open(file_name);
+                if(exists()) stream_.open(file_name);
+                else  {
+                    std::cerr << "ERROR: File does not exist: \n\t" << file_name; 
+                    exit(1);
+                }
+            }
+            
+            InputFile(std::string file_name, std::ios::openmode mode)
+            : File(file_name) {
+                if(exists()) stream_.open(file_name, std::ios::in | mode);
                 else  {
                     std::cerr << "ERROR: File does not exist: \n\t" << file_name; 
                     exit(1);
@@ -200,6 +209,10 @@ namespace em {
             
             bool eof() {
                 return stream_.eof();
+            }
+            
+            std::ifstream& get_stream() {
+                return stream_;
             }
             
         private:
