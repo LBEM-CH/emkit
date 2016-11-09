@@ -14,7 +14,6 @@
  * License for more details <http://www.gnu.org/licenses/>.
  */
 
-#include <omp.h>
 #include <vector>
 #include <algorithm>
 
@@ -70,13 +69,11 @@ void FourierTransformFFTW::clear()
 void FourierTransformFFTW::create_plans()
 {
     clear();
-    std::cout << "Creating plans... ";
     _real_data = fftw_alloc_real(real_size());
     _complex_data =  fftw_alloc_complex(fourier_size());
     _plan_r2c = fftw_plan(fftw_plan_dft_r2c(sizes_.size(), reversed_sizes().data(), _real_data, _complex_data, FFTW_MEASURE));
     _plan_c2r = fftw_plan(fftw_plan_dft_c2r(sizes_.size(), reversed_sizes().data(), _complex_data, _real_data, FFTW_MEASURE));
     _initialized = true;
-    std::cout << " Done.\n";
 }
 
 FourierTransformFFTW& FourierTransformFFTW::operator=(const FourierTransformFFTW& rhs)

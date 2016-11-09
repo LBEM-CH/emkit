@@ -21,6 +21,7 @@
 
 #include "../src/algorithm/convert.hpp"
 #include "../src/algorithm/fourier_transform.hpp"
+#include "../src/algorithm/fourier_filter.hpp"
 #include "../src/algorithm/numerics.hpp"
 
 namespace em {

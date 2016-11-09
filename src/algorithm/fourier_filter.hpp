@@ -21,6 +21,9 @@
 
 #include <type_traits>
 
+#include "../objects/object_base_types.hpp"
+#include "resolution_calculator.hpp"
+
 namespace em {
     
     namespace algorithm {
@@ -32,34 +35,47 @@ namespace em {
         };
         
         template<typename ObjectType_, FilterAlgorithm algo_>
-        struct FilteringImplementaiton {
+        struct filtering_impl {
+            static void low_pass(ObjectType_& obj, double cut_off_freq) {
+                std::cerr << "ERROR: The filtering algorithm could not be recognized.\n\n";
+            }
             
+            static void high_pass(ObjectType_& obj, double cut_off_freq) {
+                std::cerr << "ERROR: The filtering algorithm could not be recognized.\n\n";
+            }
+            
+            static void band_pass(ObjectType_& obj, double low_pass_freq, double high_pass_freq) {
+                std::cerr << "ERROR: The filtering algorithm could not be recognized.\n\n";
+            }
         };
         
         template<typename ObjectType_>
-        struct FilteringImplementation<ObjectType_, FilterAlgorithm::TOP_HAT> {
+        struct filtering_impl<ObjectType_, FilterAlgorithm::TOP_HAT> {
             
-            void low_pass(ObjectType_& obj, double cut_off_freq) {
+            static void low_pass(ObjectType_& obj, double cut_off_freq) {
                 for(auto& data : obj) {
-                    if(resolution(data.index(), obj.cell_lengths(), obj.cell_angle()) >= cut_off_freq) {
-                        obj[data.index()] = obj::object_traits<ObjectType_>::data_type();
+                    if(resolution(data.index(), obj.cell_lengths()) >= cut_off_freq) {
+                        using data_type = typename object::object_traits<ObjectType_>::data_type;
+                        obj[data.index()] = data_type();
                     }
                 }
             }
             
-            void high_pass(ObjectType_& obj, double cut_off_freq) {
+            static void high_pass(ObjectType_& obj, double cut_off_freq) {
                 for(auto& data : obj) {
-                    if(resolution(data.index(), obj.cell_lengths(), obj.cell_angle()) <= cut_off_freq) {
-                        obj[data.index()] = obj::object_traits<ObjectType_>::data_type();
+                    if(resolution(data.index(), obj.cell_lengths()) <= cut_off_freq) {
+                        using data_type = typename object::object_traits<ObjectType_>::data_type;
+                        obj[data.index()] = data_type();
                     }
                 }
             }
             
-            void band_pass(ObjectType_& obj, double low_pass_freq, double high_pass_freq) {
+            static void band_pass(ObjectType_& obj, double low_pass_freq, double high_pass_freq) {
                 for(auto& data : obj) {
-                    if(resolution(data.index(), obj.cell_lengths(), obj.cell_angle()) >= low_pass_freq || 
-                       resolution(data.index(), obj.cell_lengths(), obj.cell_angle()) <= high_pass_freq) {
-                        obj[data.index()] = obj::object_traits<ObjectType_>::data_type();
+                    if(resolution(data.index(), obj.cell_lengths()) >= low_pass_freq || 
+                       resolution(data.index(), obj.cell_lengths()) <= high_pass_freq) {
+                        using data_type = typename object::object_traits<ObjectType_>::data_type;
+                        obj[data.index()] = data_type();
                     }
                 }
             }
@@ -67,26 +83,41 @@ namespace em {
         };
         
         template<typename ObjectType_>
-        struct FilteringImplementation<ObjectType_, FilterAlgorithm::BUTTERWORTH> {
+        struct filtering_impl<ObjectType_, FilterAlgorithm::BUTTERWORTH> {
+            static void low_pass(ObjectType_& obj, double cut_off_freq) {
+                //TODO
+            }
             
-            //TODO
+            static void high_pass(ObjectType_& obj, double cut_off_freq) {
+                //TODO
+            }
+            
+            static void band_pass(ObjectType_& obj, double low_pass_freq, double high_pass_freq) {
+                //TODO
+            }
             
         };
         
         template<typename ObjectType_>
-        struct FilteringImplementation<ObjectType_, FilterAlgorithm::GAUSSIAN> {
+        struct filtering_impl<ObjectType_, FilterAlgorithm::GAUSSIAN> {
+            static void low_pass(ObjectType_& obj, double cut_off_freq) {
+                //TODO
+            }
             
-            //TODO
+            static void high_pass(ObjectType_& obj, double cut_off_freq) {
+                //TODO
+            }
+            
+            static void band_pass(ObjectType_& obj, double low_pass_freq, double high_pass_freq) {
+                //TODO
+            }
             
         };
         
-        
-        
-        
         template<typename ObjectType_>
-        std::enable_if<object::is_complex_valued<typename object::object_traits<ObjectType_>::data_type>::value, void>::type
-        low_pass(ObjectType_& object) {
-            
+        typename std::enable_if<object::is_complex_valued<typename object::object_traits<ObjectType_>::data_type>::value, void>::type
+        low_pass(ObjectType_& obj, double cut_off_freq) {
+            return filtering_impl<ObjectType_, FilterAlgorithm::TOP_HAT>::low_pass(obj, cut_off_freq);
         }
         
         

@@ -398,6 +398,20 @@ namespace em {
                 Tensor<data_type, rank_ - 1, order_> sliced(slice_range, slice_vector); 
                 return sliced;
             }
+            
+            void set_slice(typename index_type::value_type slice_number, Tensor<data_type, rank_ - 1, order_> slice) {
+                static_assert(rank_ > 1, "The rank should be more than 1 for setting slices");
+                assert(slice_number < range_[rank_ - 1]);
+                
+                Index < rank_ - 1 > slice_range;
+                for (int i = 0; i < rank_ - 1; ++i) slice_range[i] = range_[i];
+                assert(slice_range.size() == slice.range().size());
+                
+                RepType_ slice_vector = slice.vectorize();
+                for(int i=0; i<slice_range.size(); ++i) {
+                    data_container_[i + slice_number * slice_range.size()] = slice_vector[i];
+                }
+            }
 
 
             /**

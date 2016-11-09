@@ -30,7 +30,7 @@ namespace em {
     namespace algorithm {
 
         template<size_t rank_>
-        double resolution(Index<rank_> index, std::array<double, rank_> cell_lengths, double cell_angle) {
+        double resolution(Index<rank_> index, Index<rank_> cell_lengths, double cell_angle) {
         
             for(int i=0; i<rank_; ++i) {
                 if (cell_lengths[i] == 0 || cell_angle == 0) {
@@ -45,7 +45,7 @@ namespace em {
             }
             rec_lengths[rank_-1] = 1.0/cell_lengths[rank_-1];
             
-            double recgamma = M_PI - gamma;
+            double recgamma = M_PI - cell_angle;
             double dstar_sq_sum = 0;
             double index_rec_prod = 1;
             for(int i=0; i< rank_; ++i) {
@@ -59,7 +59,7 @@ namespace em {
         }
         
         template<size_t rank_>
-        double resolution(Index<rank_> index, std::array<double, rank_> cell_lengths) {
+        double resolution(Index<rank_> index, Index<rank_> cell_lengths) {
             
             resolution(index, cell_lengths, M_PI/2);
 

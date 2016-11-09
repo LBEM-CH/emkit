@@ -49,7 +49,7 @@ namespace em {
              * @param range
              */
             ComplexHalfObject(const index_type& range)
-            : BaseType_(range) {
+            : BaseType_(range), cell_lengths_(range) {
                 index_type complex_container_range = range;
                 complex_container_range[0] = complex_container_range[0] / 2 + 1;
                 BaseType_::resize(complex_container_range);
@@ -58,7 +58,7 @@ namespace em {
             };
 
             ComplexHalfObject(const index_type& range, const index_type& origin)
-            : BaseType_(range, origin) {
+            : BaseType_(range, origin), cell_lengths_(range) {
                 index_type complex_container_range = range;
                 complex_container_range[0] = complex_container_range[0] / 2 + 1;
                 BaseType_::resize(complex_container_range);
@@ -67,7 +67,7 @@ namespace em {
             };
 
             ComplexHalfObject(const BaseType_& tensor, bool is_first_dim_even = false)
-            : BaseType_(tensor), even_size_x_(is_first_dim_even) {
+            : BaseType_(tensor), even_size_x_(is_first_dim_even), cell_lengths_(tensor.range()) {
             };
 
             ComplexHalfObject(const ComplexHalfObject& other) = default;
@@ -136,11 +136,15 @@ namespace em {
                 else rnge[0] = rnge[0]*2 - 1;
                 return rnge;
             }
+            
+            index_type cell_lengths() {
+                return cell_lengths_;
+            }
 
 
         private:
             bool even_size_x_;
-
+            index_type cell_lengths_;
         };
     }
 }

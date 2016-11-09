@@ -40,7 +40,8 @@ namespace em {
         template<typename ValueType_, size_t rank_>
         void fourier_transform(const element::Index<rank_>& logical_range,
                 const element::Tensor<ValueType_, rank_, element::StorageOrder::COLUMN_MAJOR>& real,
-                element::Tensor<element::Complex<ValueType_>, rank_, element::StorageOrder::COLUMN_MAJOR>& complex) {
+                element::Tensor<element::Complex<ValueType_>, rank_, element::StorageOrder::COLUMN_MAJOR>& complex, 
+                std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
 
             //Check the provided size
             assert(logical_range.size() <= real.range().size());
@@ -48,7 +49,7 @@ namespace em {
             //Do the FFT
             std::vector<int> sizes;
             for (int i = 0; i < rank_; ++i) sizes.push_back((int) logical_range[i]);
-            auto output = fft::FFTEnvironment::Instance().get_transformer()->forward_fourier(sizes, real.vectorize());
+            auto output = transformer->forward_fourier(sizes, real.vectorize());
 
             //Create the complex valued tensor
             element::Index<rank_> complex_container_range = logical_range;
@@ -69,7 +70,8 @@ namespace em {
         template<typename ValueType_, size_t rank_>
         void fourier_transform(const element::Index<rank_>& logical_range,
                 const element::Tensor<element::Complex<ValueType_>, rank_, element::StorageOrder::COLUMN_MAJOR>& complex,
-                element::Tensor<ValueType_, rank_, element::StorageOrder::COLUMN_MAJOR>& real) {
+                element::Tensor<ValueType_, rank_, element::StorageOrder::COLUMN_MAJOR>& real,
+                std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
 
             //Check the provided size
             assert(logical_range.size() <= complex.range().size()*2);
@@ -83,7 +85,7 @@ namespace em {
             //Do the FFT
             std::vector<int> sizes;
             for (int i = 0; i < rank_; ++i) sizes.push_back((int) logical_range[i]);
-            auto output = fft::FFTEnvironment::Instance().get_transformer()->inverse_fourier(sizes, input);
+            auto output = transformer->inverse_fourier(sizes, input);
 
             //Create the complex valued tensor
             real = element::Tensor<ValueType_, rank_, element::StorageOrder::COLUMN_MAJOR>(logical_range, output);
@@ -92,16 +94,18 @@ namespace em {
         
         template<typename ValueType_, size_t rank_>
         void fourier_transform(const object::RealObject<ValueType_, rank_>& real, 
-                               object::ComplexHalfObject<ValueType_, rank_>& complex) {
+                               object::ComplexHalfObject<ValueType_, rank_>& complex,
+                               std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
             complex = object::ComplexHalfObject<ValueType_, rank_>(real.range());
-            fourier_transform(real.range(), real, complex);
+            fourier_transform(real.range(), real, complex, transformer);
         }
         
         template<typename ValueType_, size_t rank_>
         void fourier_transform(const object::ComplexHalfObject<ValueType_, rank_>& complex, 
-                               object::RealObject<ValueType_, rank_>& real) {
+                               object::RealObject<ValueType_, rank_>& real,
+                               std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
             real = object::RealObject<ValueType_, rank_>(complex.logical_range());
-            fourier_transform(real.range(), complex, real);
+            fourier_transform(real.range(), complex, real, transformer);
         }
     }
 }

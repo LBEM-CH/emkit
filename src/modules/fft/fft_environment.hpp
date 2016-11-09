@@ -28,20 +28,24 @@ namespace em {
                 return instance;
             };
 
-            std::shared_ptr<FFTInterface> get_transformer() {
+            std::shared_ptr<FFTInterface> global_transformer() {
                 return _transformer;
             };
+            
+            static std::shared_ptr<FFTInterface> new_transformer() {
+                //The default transformer
+                return std::shared_ptr<FFTInterface>(new FourierTransformFFTW());
+#ifdef TDX_USE_CUDA
+                //Use CUDA counterpart of the Fourier transform.
+#endif
+            }
 
         private:
 
             FFTEnvironment() {
-                //The default transformer
-                _transformer = std::shared_ptr<FFTInterface>(new FourierTransformFFTW());
-#ifdef TDX_USE_CUDA
-                //Use CUDA counterpart of the Fourier transform.
-#endif
+                _transformer = new_transformer();
             };
-
+            
             std::shared_ptr<FFTInterface> _transformer;
         };
     }
