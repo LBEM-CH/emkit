@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Emkit by C-CINA</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Emkit</h1>
+        <p>A C++ toolkit for Electron Microscopy</p>
+
+        <p class="view"><a href="https://github.com/C-CINA/emkit">View the Project on GitHub <small>C-CINA/emkit</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/C-CINA/emkit/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/C-CINA/emkit/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/C-CINA/emkit">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>
+<a id="welcome-to-emkit" class="anchor" href="#welcome-to-emkit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to emkit!</h3>
+
+<p>emkit is a ready to use fast and optimised templated C++ toolkit for developers in the field of Electron Microscopy</p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>Easy to install and extend</li>
+<li>Easy to understand, intuitional, modular in structure</li>
+<li>Defines classes and object that are typically used in the field</li>
+<li>Contains methods, algorithms, file I/O and other basic operations</li>
+<li>Optimised to handle big amount of data including high performance computing counterparts built in</li>
+</ul>
+
+<h3>
+<a id="components" class="anchor" href="#components" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Components</h3>
+
+<p>The library was designed and implemented in C++ with C++11 standards and practices. The library contains templated classes which can be adopted to the specific requirements.</p>
+
+<h4>
+<a id="classesobjects" class="anchor" href="#classesobjects" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Classes/Objects:</h4>
+
+<ul>
+<li>Tensor: A class which can store data of any kind including native objects like double, float, int, bool, or any user defined class in arbitrary n dimensions. This class also has an associated iterator which helps to iterate though all the indices and the data stored in a linear way. Objects like images, particles, Fourier images, volumes, stacks, stack of stacks, atomic models can be easily developed using this class.</li>
+<li>Sparse Tensor: In some cases the images have a lot of zeros, for example, masks, diffraction images, etc. In these cases it is not efficient to store them using the full objects. The toolkit introduces a sparse representation of the images. Using this class one can store an 8,000 X 8,000 pixel images (which would usually take 256 MB space) to a maximum space of 32 KB.</li>
+<li>Table: Tables occur in files, for example, a reflection file which gives the amplitude and phase on different miller indices or an atomic coordinate file which gives a list of coordinates mapped to the atom at that location. This class provides manipulations like changing a column, reducing a column, etc. on these kind of files.
+Other general purpose classes like Strings, Files etc.</li>
+</ul>
+
+<h4>
+<a id="methods" class="anchor" href="#methods" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Methods</h4>
+
+<ul>
+<li>File Input/Output: The toolkit can read and write commonly used image file formats including mrc, mtz, map,  hkl.</li>
+<li>Fourier transforms: Fourier transforms are integral part of image processing in cryo-EM. API is provided using FFTW library to easily carry out Fourier transforms and convert one tensor to the other.</li>
+<li>Class converters: Converts the representation of one object to the other.
+Basic image processing algorithms: Masking, sectioning, slicing, erosion, dilation, correlation etc. are provided</li>
+</ul>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>Nikhil Biyani (<a href="https://github.com/nikhilbiyani" class="user-mention">@nikhilbiyani</a>)</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/C-CINA">C-CINA</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
