@@ -20,6 +20,7 @@
 #define NUMERICS_HPP
 
 #include <iterator>
+#include <numeric>
 
 namespace em {
 

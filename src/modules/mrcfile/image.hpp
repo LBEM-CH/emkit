@@ -26,6 +26,7 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <numeric>
 
 #include "header.hpp"
 #include "data.hpp"
