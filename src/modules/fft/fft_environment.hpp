@@ -39,6 +39,14 @@ namespace em {
                 //Use CUDA counterpart of the Fourier transform.
 #endif
             }
+            
+            static std::shared_ptr<FFTInterface> new_transformer(const std::vector<int>& sizes) {
+                //The default transformer
+                return std::shared_ptr<FFTInterface>(new FourierTransformFFTW(sizes));
+#ifdef TDX_USE_CUDA
+                //Use CUDA counterpart of the Fourier transform.
+#endif
+            }
 
         private:
 

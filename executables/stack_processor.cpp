@@ -47,33 +47,47 @@ int main(int argc, char** argv) {
     std::mutex critical;
     Volume output({columns / 2, rows / 2, sections}, 0.0);
     Index2d output_range = Index2d({columns / 2, rows / 2});
+    
+    // Create transformers containing FFTW plans with requied sizes
+    auto f_transformer = em::fft::FFTEnvironment::Instance().new_transformer({columns, rows});
+    auto i_transformer = em::fft::FFTEnvironment::Instance().new_transformer({columns/2, rows/2});
+    
+    //Trial Fourier transform to create plans
+    ComplexImage fourier_im;
+    fourier_transform(input.slice(0), fourier_im, f_transformer);
+    ComplexImage fourier_cropped(output_range);
+    Image cropped;
+    fourier_transform(fourier_cropped, cropped, i_transformer);
+    
     for (int t = 0; t < num_threads; ++t) {
         int begin = t * thread_load;
         int end = (t + 1) * thread_load;
 
         //Last one has to take the extra load
         if (t == num_threads - 1) end += extra_load;
-        
+        //std::cout << "Thread: " << t << " processing " << begin << " to " << end << "\n";
         threads[t] = thread(bind([&](int begin, int end) {
             
             for (int stack = begin; stack < end; ++stack) {
+                //std::cout << "Processing stack " << stack << std::endl;
                 Image image = input.slice(stack);
                 ComplexImage fourier_image;
                 
-                fourier_transform(image, fourier_image, fft::FFTEnvironment::Instance().new_transformer());
+                fourier_transform(image, fourier_image, f_transformer);
                 
                 //Crop the image
                 ComplexImage fourier_cropped(output_range);
                 for (auto& data : fourier_image) if (fourier_cropped.range().contains(data.index())) fourier_cropped[data.index()] = data.value();
                 Image cropped;
 
-                fourier_transform(fourier_cropped, cropped, fft::FFTEnvironment::Instance().new_transformer());
+                fourier_transform(fourier_cropped, cropped, i_transformer);
 
                 //Write to the output synchronously
                 {
-                    std::lock_guard<std::mutex> lock(critical);
+                    critical.lock();
                     std::cout << "Setting stack " << stack << std::endl;
                     output.set_slice(stack, cropped);
+                    critical.unlock();
                 }
             }
         }, begin, end));

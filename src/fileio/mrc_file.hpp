@@ -141,7 +141,7 @@ namespace em {
                 }
 
                 //Change to the current sizes
-                std::cout << object.range() << "\n";
+                //std::cout << object.range() << "\n";
                 mrc_image_.header().set("columns", std::to_string(object.range()[0]));
                 mrc_image_.header().set("rows", std::to_string(object.range()[1]));
                 if (rank_ == 3) mrc_image_.header().set("sections", std::to_string(object.range()[2]));

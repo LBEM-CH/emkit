@@ -46,6 +46,12 @@ namespace em {
              * Sets the size variables to 0
              */
             FourierTransformFFTW();
+            
+            /**
+             * Constructor pre-creating plans with the given sizes
+             * @param sizes
+             */
+            FourierTransformFFTW(const std::vector<int>& sizes);
 
             /**
              * Copy constructor

@@ -37,6 +37,21 @@ FourierTransformFFTW::FourierTransformFFTW()
     fftw_plan_with_nthreads(std::thread::hardware_concurrency());
 }
 
+FourierTransformFFTW::FourierTransformFFTW(const std::vector<int>& sizes)
+{
+    sizes_ = sizes;
+    _initialized = false;
+    
+    //Initialize the threaded environment in FFTW
+    fftw_init_threads();
+    
+    //Set maximum number of threads
+    fftw_plan_with_nthreads(std::thread::hardware_concurrency());
+    
+    //Create plans
+    create_plans();
+}
+
 FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
 {
     reset(copy);
@@ -69,26 +84,30 @@ void FourierTransformFFTW::clear()
 {
     if(_initialized)
     {
-        mutex_.lock();
+        
         fftw_free(_real_data);
         fftw_free(_complex_data);
         fftw_destroy_plan(_plan_r2c);
         fftw_destroy_plan(_plan_c2r);
-        mutex_.unlock();
+        
     }
     _initialized = false;
 }
 
 void FourierTransformFFTW::create_plans()
 {
+    //std::cout << "Creating plans\n";
+    mutex_.lock();
     clear();
     _real_data = fftw_alloc_real(real_size());
     _complex_data =  fftw_alloc_complex(fourier_size());
-    mutex_.lock();
+    
     _plan_r2c = fftw_plan(fftw_plan_dft_r2c(sizes_.size(), reversed_sizes().data(), _real_data, _complex_data, FFTW_MEASURE));
     _plan_c2r = fftw_plan(fftw_plan_dft_c2r(sizes_.size(), reversed_sizes().data(), _complex_data, _real_data, FFTW_MEASURE));
-    mutex_.unlock();
     _initialized = true;
+    mutex_.unlock();
+    
+    //std::cout << "Finished creating plans\n";
 }
 
 FourierTransformFFTW& FourierTransformFFTW::operator=(const FourierTransformFFTW& rhs)
@@ -131,6 +150,7 @@ double FourierTransformFFTW::normalization_factor()
 
 std::vector<double> FourierTransformFFTW::forward_fourier(const std::vector<int>& sizes, const std::vector<double>& input)
 {
+    //std::cout << "Forward transform\n";
     //Re-plan if required
     if(!_initialized || sizes_ != sizes)
     {
@@ -155,12 +175,13 @@ std::vector<double> FourierTransformFFTW::forward_fourier(const std::vector<int>
         output[2*id] = ((fftw_complex*)_complex_data)[id][0] * factor;
         output[2*id+1] = ((fftw_complex*)_complex_data)[id][1] * -1 * factor;
     }
-    
+    //std::cout << "Finished forward\n";
     return output;
 }
 
 std::vector<double> FourierTransformFFTW::inverse_fourier(const std::vector<int>& sizes, const std::vector<double>& input)
 {
+    //std::cout << "Inverse transform\n";
     //Re-plan if required
     if(!_initialized || sizes_ != sizes)
     {
@@ -185,6 +206,6 @@ std::vector<double> FourierTransformFFTW::inverse_fourier(const std::vector<int>
     
     #pragma omp parallel for
     for(int id=0; id<real_size(); id++) output[id] = _real_data[id];
-    
+    //std::cout << "Finished inverse\n";
     return output;
 }
