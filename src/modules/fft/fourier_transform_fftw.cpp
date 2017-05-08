@@ -16,15 +16,25 @@
 
 #include <vector>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 
 #include "fourier_transform_fftw.hpp"
 
 using namespace em::fft;
 
+std::mutex FourierTransformFFTW::mutex_;
+
 FourierTransformFFTW::FourierTransformFFTW()
 {
     sizes_ = std::vector<int>();
     _initialized = false;
+    
+    //Initialize the threaded environment in FFTW
+    fftw_init_threads();
+    
+    //Set maximum number of threads
+    fftw_plan_with_nthreads(std::thread::hardware_concurrency());
 }
 
 FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
@@ -35,6 +45,7 @@ FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
 FourierTransformFFTW::~FourierTransformFFTW()
 {
     clear();
+    fftw_cleanup_threads();
     fftw_cleanup();
 }
 
@@ -58,10 +69,12 @@ void FourierTransformFFTW::clear()
 {
     if(_initialized)
     {
+        mutex_.lock();
         fftw_free(_real_data);
         fftw_free(_complex_data);
         fftw_destroy_plan(_plan_r2c);
         fftw_destroy_plan(_plan_c2r);
+        mutex_.unlock();
     }
     _initialized = false;
 }
@@ -71,8 +84,10 @@ void FourierTransformFFTW::create_plans()
     clear();
     _real_data = fftw_alloc_real(real_size());
     _complex_data =  fftw_alloc_complex(fourier_size());
+    mutex_.lock();
     _plan_r2c = fftw_plan(fftw_plan_dft_r2c(sizes_.size(), reversed_sizes().data(), _real_data, _complex_data, FFTW_MEASURE));
     _plan_c2r = fftw_plan(fftw_plan_dft_c2r(sizes_.size(), reversed_sizes().data(), _complex_data, _real_data, FFTW_MEASURE));
+    mutex_.unlock();
     _initialized = true;
 }
 

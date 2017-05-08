@@ -31,6 +31,7 @@ foreach(i ${RUNNER_SOURCES})
     #Link to the library created in step above
     target_link_libraries(${EXECUTABLE} LINK_PUBLIC emkit)
     target_link_libraries(${EXECUTABLE} ${FFTWD_LIB})
+    target_link_libraries(${EXECUTABLE} ${FFTWD_THREADS_LIB})
     list(APPEND EXECUTABLES_VP ${EXECUTABLE})
 endforeach(i ${RUNNER_SOURCES})
 

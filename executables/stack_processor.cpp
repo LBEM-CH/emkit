@@ -60,20 +60,15 @@ int main(int argc, char** argv) {
                 Image image = input.slice(stack);
                 ComplexImage fourier_image;
                 
-                {
-                    std::lock_guard<std::mutex> lock(critical);
-                    fourier_transform(image, fourier_image, fft::FFTEnvironment::Instance().new_transformer());
-                }
+                fourier_transform(image, fourier_image, fft::FFTEnvironment::Instance().new_transformer());
                 
                 //Crop the image
                 ComplexImage fourier_cropped(output_range);
                 for (auto& data : fourier_image) if (fourier_cropped.range().contains(data.index())) fourier_cropped[data.index()] = data.value();
                 Image cropped;
-                
-                {
-                    std::lock_guard<std::mutex> lock(critical);
-                    fourier_transform(fourier_cropped, cropped, fft::FFTEnvironment::Instance().new_transformer());
-                }
+
+                fourier_transform(fourier_cropped, cropped, fft::FFTEnvironment::Instance().new_transformer());
+
                 //Write to the output synchronously
                 {
                     std::lock_guard<std::mutex> lock(critical);

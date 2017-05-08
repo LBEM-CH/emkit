@@ -20,6 +20,7 @@
 #include <iostream>
 #include <math.h>
 #include <memory>
+#include <mutex>
 
 #include <fftw3.h>
 
@@ -187,6 +188,10 @@ namespace em {
              */
             bool _initialized;
 
+            /**
+             * Mutex to execute on single thread
+             */
+            static std::mutex mutex_;
 
 
         }; // class FourierTransformFFTW
