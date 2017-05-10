@@ -184,6 +184,21 @@ namespace em {
 
                 return true;
             }
+            
+            /**
+             * @brief   Compares indices from smallest rank to highest for 
+             *          smallest index
+             * @param   right
+             * @return 
+             */
+            bool operator<(const Index<rank_>& right) const {
+                for (int idx = 0; idx < rank_; ++idx) {
+                    if(at(idx) < right.at(idx)) return true;
+                }
+                
+                return false;
+            }
+
 
             /**@}*/
 

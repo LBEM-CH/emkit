@@ -75,7 +75,7 @@ namespace em {
              * @return modified this object
              */
             Complex operator+(const Complex& rhs) const {
-                return complex_ + rhs.complex_;
+                return Complex(real() + rhs.real(), imag() + rhs.imag());
             };
 
             /**

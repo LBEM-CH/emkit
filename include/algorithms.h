@@ -23,6 +23,7 @@
 #include "../src/algorithm/fourier_transform.hpp"
 #include "../src/algorithm/fourier_filter.hpp"
 #include "../src/algorithm/numerics.hpp"
+#include "../src/algorithm/matrix_multiplication.hpp"
 
 namespace em {
     

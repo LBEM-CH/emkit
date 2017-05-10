@@ -75,6 +75,10 @@ namespace em {
                     std::cerr << "ERROR! The size of the target object to be read from file '" << file_name_ << "'is not set\n";
                     exit(1);
                 }
+                
+                index_type origin = obj.range()*0.5;
+                origin[0] = 0;
+                obj.transform_origin(origin);
 
                 int number_cols = guess_number_of_cols();
                 element::Table table = element::Table::read_table(file_name_, number_cols);

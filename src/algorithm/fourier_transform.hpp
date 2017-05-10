@@ -26,7 +26,6 @@
 #include "../objects/object_base_types.hpp"
 #include "../objects/complex_half_object.hpp"
 
-
 namespace em {
     
     namespace algorithm {
@@ -54,7 +53,9 @@ namespace em {
             //Create the complex valued tensor
             element::Index<rank_> complex_container_range = logical_range;
             complex_container_range[0] = complex_container_range[0] / 2 + 1;
-            complex = element::Tensor<element::Complex<ValueType_>, rank_, element::StorageOrder::COLUMN_MAJOR>(complex_container_range, element::Complex<ValueType_>());
+            element::Index<rank_> origin = complex_container_range*0.5;
+            origin[0] = 0;
+            complex = element::Tensor<element::Complex<ValueType_>, rank_, element::StorageOrder::COLUMN_MAJOR>(complex_container_range, origin, element::Complex<ValueType_>());
 
             for (int id = 0; id < complex.range().size(); id++) {
                 complex[id] = element::Complex<ValueType_>((ValueType_) output[2 * id], (ValueType_) output[2 * id + 1]);
@@ -96,7 +97,6 @@ namespace em {
         void fourier_transform(const object::RealObject<ValueType_, rank_>& real, 
                                object::ComplexHalfObject<ValueType_, rank_>& complex,
                                std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
-            complex = object::ComplexHalfObject<ValueType_, rank_>(real.range());
             fourier_transform(real.range(), real, complex, transformer);
         }
         
@@ -104,7 +104,6 @@ namespace em {
         void fourier_transform(const object::ComplexHalfObject<ValueType_, rank_>& complex, 
                                object::RealObject<ValueType_, rank_>& real,
                                std::shared_ptr<fft::FFTInterface> transformer = fft::FFTEnvironment::Instance().global_transformer()) {
-            real = object::RealObject<ValueType_, rank_>(complex.logical_range());
             fourier_transform(real.range(), complex, real, transformer);
         }
     }
