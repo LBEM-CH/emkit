@@ -66,6 +66,7 @@ namespace em {
                     std::string line = ifs.read_line();
                     std::string line_trimmed = String::trim(line);
                     if(line[0] != line_comment_char) {
+                        //std::cout << "line: " << line_trimmed << std::endl;
                         table.append_row(String::split(line_trimmed, delimiter));
                     }
                 }
@@ -126,9 +127,9 @@ namespace em {
             template<typename ValueType_>
             typename std::enable_if<std::is_fundamental<ValueType_>::value, void>::type
             set_row(int row_number, const std::vector<ValueType_>& row) {
-                if (row.size() != columns_) {
+                if (row.size() < columns_) {
                     std::cerr << "WARNING: Setting a row in Table, encountered " << row.size()
-                            << " columns (expected: " << columns_ << "). Will trim/extend!!\n";
+                            << " columns (expected: " << columns_ << "). Will extend!!\n";
                 }
 
                 int column_number = 0;
@@ -140,9 +141,9 @@ namespace em {
             }
 
             void set_row(int row_number, std::vector<std::string> row) {
-                if (row.size() != columns_) {
+                if (row.size() < columns_) {
                     std::cerr << "WARNING: Setting a row in Table, encountered " << row.size()
-                            << " columns (expected: " << columns_ << "). Will trim/extend!!\n";
+                            << " columns (expected: " << columns_ << "). Will extend!!\n";
                 }
 
                 int column_number = 0;
@@ -212,9 +213,9 @@ namespace em {
             typename std::enable_if<std::is_fundamental<ValueType_>::value, void>::type
             append_row(const std::vector<ValueType_>& row) {
                 if(row.size() == 0) return;
-                if (row.size() != columns_) {
+                if (row.size() < columns_) {
                     std::cerr << "WARNING: Setting a row in Table, encountered " << row.size()
-                            << " columns (expected: " << columns_ << "). Will trim/extend!!\n";
+                            << " columns (expected: " << columns_ << "). Will extend!!\n";
                 }
 
                 int column_number = 0;
@@ -231,9 +232,9 @@ namespace em {
 
             void append_row(std::vector<std::string> row) {
                 if(row.size() == 0) return;
-                if (row.size() != columns_) {
+                if (row.size() < columns_) {
                     std::cerr << "WARNING: Setting a row in Table, encountered " << row.size()
-                            << " columns (expected: " << columns_ << "). Will trim/extend!!\n";
+                            << " columns (expected: " << columns_ << "). Will extend!!\n";
                 }
 
                 int column_number = 0;

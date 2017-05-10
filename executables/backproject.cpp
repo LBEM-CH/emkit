@@ -18,17 +18,19 @@ typedef std::multimap<Index3d, element::Complex<double> > FourierMultiVolume;
 typedef std::pair<Index3d, element::Complex<double> > IndexComplexPair;
 
 
-FourierImage phase_shift(FourierImage input, double x_shift, double y_shift) {
+FourierImage phase_shift(const FourierImage& input, double x_shift, double y_shift) {
     
     int dim = input.range().at(1);
     
     FourierImage output = input;
-    
+    //std::cout << "Assigned output\n";
     for(const auto& data : input) {
-        auto current_complex = data.value();
-        double new_phase = current_complex.phase() + (2/dim) * (x_shift*data.index().at(0) + y_shift*data.index().at(1));
+        element::Complex<double> current_complex = data.value();
+        Index2d current_index = data.index();
+        double new_phase = current_complex.phase() + (2*1.0/dim) * (x_shift*data.index().at(0) + y_shift*data.index().at(1));
+        //std::cout << data.index() << " " << current_complex.phase() << " -> " << new_phase << "\n";
         current_complex.set_phase(new_phase);
-        output.at(data.index()) = current_complex;
+        output[current_index] = current_complex;
     }
     
     return output;
@@ -37,8 +39,7 @@ FourierImage phase_shift(FourierImage input, double x_shift, double y_shift) {
 
 Index3d tranformed_index(const Index3d& input, double psi, double theta, double phi) {
     
-    assert(input.rank == 3);
-    
+    //cout << "Transforming " << input << endl;
     // Values for transformation
     double cpsi = cos(psi);
     double cthe = cos(theta);
@@ -58,44 +59,63 @@ Index3d tranformed_index(const Index3d& input, double psi, double theta, double 
     
     transformed.at(2) = round(input.at(0)*(-1*cpsi*sthe) + input.at(1)*(spsi*sthe) + input.at(2)*cthe);
     
+    //cout << "Transformed " << transformed << endl;
     return transformed;
     
 }
 
-void average_reflections(const FourierMultiVolume& reflections, FourierVolume& volume)
+void average_reflections(const std::vector<element::Complex<double>>& current_reflections, element::Complex<double>& avg) {
+    element::Complex<double> sm(0.0, 0.0);
+    
+    if(current_reflections.size() == 0) return;
+    
+    for(const auto& c : current_reflections) {
+        sm = sm + c;
+        std::cout << sm << "\n";
+    }
+    
+    avg = element::Complex<double>(sm.real()/current_reflections.size(), sm.imag()/current_reflections.size());
+    std::cout << "Returning: " << avg << "\n";
+}
+
+void average_fourier_volume(const FourierMultiVolume& reflections, FourierVolume& volume)
 {
     
     bool initialized = false;
     
     Index3d current_index;
     std::vector<element::Complex<double> > current_reflections;
+    element::Complex<double> avg_spot;
     
-    for(FourierMultiVolume::const_iterator spot_itr=reflections.begin(); spot_itr!=reflections.end(); ++spot_itr)
+    for(const auto& itr : reflections)
     {
         // Initialize for the start
         if(!(initialized))
         {
-            current_index = (*spot_itr).first;
+            current_index = itr.first;
             initialized = true;
         }
         
         // Average and insert accumulated spots
-        if(!(current_index == (*spot_itr).first))
+        if(!(current_index == itr.first))
         {
-            element::Complex<double> avg_spot = std::accumulate(current_reflections.begin(), current_reflections.end(), element::Complex<double>(0.0, 0.0)) * (1/current_reflections.size());
-                        
+            std::cout << "Averaging spots: " << current_reflections.size() << "\n";
+            for(auto s : current_reflections) std::cout << " " << s;
+            std::cout << std::endl;
+            average_reflections(current_reflections, avg_spot);
+            std::cout << "Averaged spot: " << avg_spot;
             volume.insert(current_index, avg_spot);
             current_reflections.clear();
         }
         
         //Accumulate the spots in a list
-        current_reflections.push_back((*spot_itr).second);
-        current_index = (*spot_itr).first;
+        current_reflections.push_back(itr.second);
+        current_index = itr.first;
         
     }
     
     //insert the final reflection
-    element::Complex<double> avg_spot = std::accumulate(current_reflections.begin(), current_reflections.end(), element::Complex<double>(0.0, 0.0)) * (1/current_reflections.size());
+    average_reflections(current_reflections, avg_spot);
     volume.insert(current_index, avg_spot);
 }
 
@@ -115,8 +135,8 @@ int main(int argc, char** argv) {
     
     // Read the par file
     cout << "Reading the parameters file...\n";
-    Table par_table;
-    par_table.read_table(argv[1], 6, ' ', 'C');
+    Table par_table = Table::read_table(argv[2], 6, ' ', 'C');
+    
     
     // Calculate grid size
     int num_particles = particles.range().at(2);
@@ -155,38 +175,46 @@ int main(int argc, char** argv) {
                 std::cout << "Processing particle " << particle << std::endl;
                 Image image = particles.slice(particle);
                 FourierImage fourier_image;
-                               
+                          
                 std::vector<double> pars = par_table.get_row<double>(particle);
                 double psi = pars.at(1)*M_PI/180;
                 double theta = pars.at(2)*M_PI/180;
                 double phi = pars.at(3)*M_PI/180;
                 double x_shift = pars.at(4);
                 double y_shift = pars.at(5);
-                
+
+                //std::cout << "Fourier transforming:...\n"; 
                 fourier_transform(image, fourier_image, f_transformer);
                 
                 // Do the phase shift
+                //std::cout << "Phase shifting:...\n";
                 fourier_image = phase_shift(fourier_image, x_shift, y_shift);
                 
                 // Transform the indices and place in 3D Fourier space
                 for(const auto& itr : fourier_image) {
                     Index2d im_idx = itr.index();
                     Index3d vol_idx = tranformed_index(Index3d{im_idx.at(0), im_idx.at(1), 0}, psi, theta, phi);
+                    auto current_complex = itr.value();
+                    if(vol_idx.at(0) < 0) {
+                        vol_idx = vol_idx*(-1);
+                        current_complex.imag(-1*current_complex.imag());
+                    }
                     
                     // Synchronously write to the 3D multi reflections volume
                     critical.lock();
-                    if(itr.value().amplitude() > 0.0001) reflections.insert(IndexComplexPair(vol_idx, itr.value()));
+                    if(itr.value().amplitude() > 0.0001) reflections.insert(IndexComplexPair(vol_idx, current_complex));
                     critical.unlock();
                 }
             }
+            
+            
         }, begin, end));
     }
 
     for (thread& t : threads) t.join();
 
-    std::cout << "Averaging the reflections\n";
-    FourierVolume final_fourier = FourierVolume(Index3d({columns, rows, sections}));
-    average_reflections(reflections, final_fourier);
+    FourierVolume final_fourier = FourierVolume(Index3d({columns, rows, sections}), Index3d({0, rows/2, sections/2}));
+    average_fourier_volume(reflections, final_fourier);
     
     std::cout << "Inverse Fourier transforming the final volume\n";
     Volume output;
