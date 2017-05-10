@@ -20,6 +20,7 @@
 #define HEADER_HPP_HC343PL
 
 #include <iostream>
+#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -102,9 +103,9 @@ namespace em {
             };
 
             size_t data_points() {
-                return (size_t) (std::stoi(get("columns"))
-                        * std::stoi(get("rows"))
-                        * std::stoi(get("sections")));
+                return (size_t) (std::stoul(get("columns"))
+                        * std::stoul(get("rows"))
+                        * std::stoul(get("sections")));
             }
 
             bool should_swap_endianness() {

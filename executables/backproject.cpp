@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <thread>
 #include "objects.h"
 #include "elements.h"
 #include "algorithms.h"
@@ -11,7 +12,6 @@ using namespace em;
 typedef RealObject<double, 3> Stack;
 typedef RealObject<double, 3> Volume;
 typedef RealObject<double, 2> Image;
-typedef ComplexObject<double, 2> FourierFullImage;
 typedef ComplexHalfObject<double, 2> FourierImage;
 typedef ComplexHalfObject<double, 3> FourierVolume;
 typedef std::multimap<Index3d, element::Complex<double> > FourierMultiVolume;
@@ -108,11 +108,13 @@ int main(int argc, char** argv) {
     }
     
     // Reading the stack
+    cout << "Reading the particles...\n";
     Stack particles;
     PropertiesMap header_values;
     MRCFile(argv[1]).load(particles, header_values);
     
     // Read the par file
+    cout << "Reading the parameters file...\n";
     Table par_table;
     par_table.read_table(argv[1], 6, ' ', 'C');
     
@@ -147,7 +149,6 @@ int main(int argc, char** argv) {
 
         //Last one has to take the extra load
         if (t == num_threads - 1) end += extra_load;
-        //std::cout << "Thread: " << t << " processing " << begin << " to " << end << "\n";
         threads[t] = thread(bind([&](int begin, int end) {
             
             for (int particle = begin; particle < end; ++particle) {
