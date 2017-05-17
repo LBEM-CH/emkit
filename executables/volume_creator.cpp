@@ -26,8 +26,9 @@ int main(int argc, char** argv) {
     
     Index3d center = {nx/2, ny/2, nz/2};
     for(auto& val : circle) {
-        if(center.distance(val.index()) < radius) {
-            val.value() = 1.0;
+        auto index = val.index() - center;
+        for(int i=0; i<3; ++i) {
+            if(index[i] > -1* radius && index[i] < radius) val.value() = 1.0;
         }
     }
     

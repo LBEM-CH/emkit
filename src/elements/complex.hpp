@@ -101,7 +101,8 @@ namespace em {
              * @return multiplied complex
              */
             Complex operator*(const Complex& other) const {
-                return complex_ * other.complex_;
+                return Complex(this->real()*other.real() - this->imag()*other.imag(),
+                        this->real()*other.imag() + this->imag()*other.real());
             };
 
             /**

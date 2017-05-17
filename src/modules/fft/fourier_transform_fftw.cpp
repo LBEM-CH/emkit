@@ -60,8 +60,6 @@ FourierTransformFFTW::FourierTransformFFTW(const FourierTransformFFTW& copy)
 FourierTransformFFTW::~FourierTransformFFTW()
 {
     clear();
-    fftw_cleanup_threads();
-    fftw_cleanup();
 }
 
 void FourierTransformFFTW::reset(const FourierTransformFFTW& copy)

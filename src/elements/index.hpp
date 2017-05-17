@@ -361,7 +361,7 @@ namespace em {
                 Index<3> diff = *this-other;
                 double dist = 0;
                 for(int i=0; i<3; ++i) dist += diff[i]*diff[i];
-                return dist;
+                return sqrt(dist);
             }
             
             /**@}*/

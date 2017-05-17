@@ -41,7 +41,7 @@ namespace em {
             for(int i = 0; i < r1; ++i) {
                 for(int j = 0; j < c2; ++j) {
                     for(int k = 0; k < c1; ++k) {
-                        mult[i][j] += mat1[i][k] * mat2[k][j];
+                        mult[Index2d({i,j})] += mat1[Index2d({i,k})] * mat2[Index2d({k,j})];
                     }
                 }
             }
